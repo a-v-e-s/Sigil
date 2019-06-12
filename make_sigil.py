@@ -1,12 +1,14 @@
 """
-make_sigil.py:
+make_sigil.py: Turn a statement into a symbol only the subconscious mind can possibly decode.
+
+Under active development.
 
 Author: Jon David Tannehill
 """
 
 from PIL import Image, ImageFont, ImageDraw, ImageOps
 import tkinter as tk
-import subprocess, sys, random, math
+import subprocess, sys, random, factor
 
 """
 PIL
@@ -18,6 +20,7 @@ Fix block/position issue
 
 class Gui():
     def __init__(self):
+        # initialize the widgets, variables, etc.
         self.root = tk.Tk()
         self.root.title('Sigil Maker')
         tk.Label(self.root, text='Enter the text you wish to turn into a sigil:').grid(row=1, column=1, columnspan=2)
@@ -56,28 +59,29 @@ class Gui():
         z.configure(text='Go!', command=self.make_sigil)
         z.grid(row=self.rownum, column=1, columnspan=2)
 
+        # add room for two statements, and set the options to their defaults
         self.add_entry()
         self.add_entry()
-        d.set(10)
-        f.set(10)
-        h.deselect()
-
-        self.font_options = [x for x in subprocess.getoutput('ls fonts').split() if x.endswith('tf')]
         self.chop_width.set(10)
         self.chop_height.set(10)
+        h.deselect()
         self.entries[0].focus_set()
         
+        # keybindings
         self.root.bind(sequence='<Return>', func=(lambda x=self.make_sigil: self.make_sigil()))
         self.root.bind(sequence='<Control-KeyPress-n>', func=(lambda y=self.add_entry: self.add_entry()))
         self.root.bind(sequence='<Control-KeyPress-d>', func=(lambda z=self.remove: self.remove()))
 
 
     def add_entry(self):
+        # create new entry widget and variable for it
         text = tk.StringVar()
         entry = tk.Entry(self.root, width=40, textvariable=text)
         entry.grid(row=self.rownum-6, column=1, columnspan=2)
         self.phrases.append(text)
         self.entries.append(entry)
+        
+        # adjust other widgets accordingly
         self.rownum += 1
         self.widgets[0].grid(row=self.rownum-4, column=1)
         self.widgets[1].grid(row=self.rownum-4, column=2)
@@ -91,10 +95,12 @@ class Gui():
 
     
     def remove(self):
+        # remove the entry widget and its variable
         del self.phrases[-1]
         self.entries[-1].grid_forget()
         del self.entries[-1]
 
+        # adjust widgets accordingly
         self.rownum -= 1
         self.widgets[0].grid(row=self.rownum-4, column=1)
         self.widgets[1].grid(row=self.rownum-4, column=2)
@@ -108,14 +114,23 @@ class Gui():
         
 
     def make_sigil(self):
+        font_options = [x for x in subprocess.getoutput('ls fonts').split() if x.endswith('tf')]
+
         for a in self.phrases:
-            font = ImageFont.truetype(font=random.choice(self.font_options), size=48, encoding='unic')
+            # make an image out of the text in each entry
+            # make its size a multiple of the chop_sizes
+            font = ImageFont.truetype(font=random.choice(font_options), size=48, encoding='unic')
             text = a.get()
             text_width, text_height = font.getsize(text)
+            if text_width % self.chop_width.get() != 0:
+                text_width += (self.chop_width.get() - (text_width % self.chop_width.get()))
+            if text_height % self.chop_height.get() != 0:
+                text_height += (self.chop_height.get() - (text_height % self.chop_height.get()))
             canvas = Image.new('L', (text_width, text_height), "white")
             draw = ImageDraw.Draw(canvas)
             draw.text((0, 0), text, 'black', font)
 
+            # if user wanted it colorized, colorize it in the most random way possible
             if self.colorized.get():
                 text_color = (random.choice(range(255)), random.choice(range(255)), random.choice(range(255)))
                 background_color = (random.choice(range(255)), random.choice(range(255)), random.choice(range(255)))
@@ -125,30 +140,42 @@ class Gui():
                 whitepoint = random.choice(range(midpoint, 255))
                 canvas = ImageOps.colorize(canvas, text_color, background_color, mid, blackpoint, whitepoint, midpoint)
     
+            # chop the image of the text up into bite-sized blocks
             img_width, img_height = canvas.size
             blocks = []
             for w in range(0, img_width, self.chop_width.get()):
                 for h in range(0, img_height, self.chop_height.get()):
-                    box = (w, h, w+self.chop_width.get(), h+self.chop_height.get())
+                    # are the elif, else conditions still necessary now that original canvas size is modified?
+                    if (w + self.chop_width.get() < img_width) and (h + self.chop_height.get() < img_height):
+                        box = (w, h, w+self.chop_width.get(), h+self.chop_height.get())
+                    elif (w + self.chop_width.get() < img_width) and (h + self.chop_height.get() >= img_height):
+                        box = (w, h, w+self.chop_width.get(), img_height)
+                    elif (w + self.chop_width.get() >= img_width) and (h + self.chop_height.get() < img_height):
+                        box = (w, h, img_width, h+self.chop_height.get())
+                    else:
+                        box = (w, h, img_width, img_height)
                     blocks.append(canvas.crop(box))
             
-            sigil_width = math.ceil(math.sqrt(len(blocks))) * self.chop_width.get()
-            sigil_height = math.ceil(math.sqrt(len(blocks))) * self.chop_height.get()
-            x, y = 0, sigil_height
-            position = (x, y)
+            #shuffle the pieces of the old image, prepare the new image
             random.shuffle(blocks)
+            sigil_width = factor.factors(len(blocks))[-1][0] * self.chop_width.get()
+            sigil_height = factor.factors(len(blocks))[-1][1] * self.chop_height.get()
+            x, y = 0, 0
+            position = (x, y)
             sigil = Image.new('RGB', (sigil_width, sigil_height), 'white')
 
+            # put the pieces into place
             for b in blocks:
                 sigil.paste(b, box=position)
-                if (position[0] + self.chop_width.get()) <= sigil_width:
+                if (position[0] + self.chop_width.get()) < sigil_width:
                     x += self.chop_width.get()
                 else:
                     x = 0
-                    y -= self.chop_height.get()
+                    y += self.chop_height.get()
                 position = (x, y)
 
-            sigil.save(''.join([str(ord(x)) for x in text[:4]]) + '.png', 'PNG')
+            # save and display
+            sigil.save(''.join([str(ord(x)) for x in text[-4:]]) + '.png', 'PNG')
             sigil.show()
             
 
