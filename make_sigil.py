@@ -8,15 +8,8 @@ Author: Jon David Tannehill
 
 from PIL import Image, ImageFont, ImageDraw, ImageOps
 import tkinter as tk
-import subprocess, sys, random, factor
+import subprocess, sys, random, math, factors
 
-"""
-PIL
-"Effects": Reduce Noice, Spread, Edge Detect, 
-"FX": Swirl, Implode, Oil Paint
-Add better colorization?
-Fix block/position issue
-"""
 
 class Gui():
     def __init__(self):
@@ -114,6 +107,7 @@ class Gui():
         
 
     def make_sigil(self):
+        # would this work on Windows? Do I care????
         font_options = [x for x in subprocess.getoutput('ls fonts').split() if x.endswith('tf')]
 
         for a in self.phrases:
@@ -135,9 +129,9 @@ class Gui():
                 text_color = (random.choice(range(255)), random.choice(range(255)), random.choice(range(255)))
                 background_color = (random.choice(range(255)), random.choice(range(255)), random.choice(range(255)))
                 mid = (random.choice(range(255)), random.choice(range(255)), random.choice(range(255)))
-                midpoint = random.choice(range(255))
-                blackpoint = random.choice(range(0, midpoint))
-                whitepoint = random.choice(range(midpoint, 255))
+                midpoint = random.choice(range(84, 170))
+                blackpoint = random.choice(range(0, 42))
+                whitepoint = random.choice(range(212, 255))
                 canvas = ImageOps.colorize(canvas, text_color, background_color, mid, blackpoint, whitepoint, midpoint)
     
             # chop the image of the text up into bite-sized blocks
@@ -156,15 +150,22 @@ class Gui():
                         box = (w, h, img_width, img_height)
                     blocks.append(canvas.crop(box))
             
-            #shuffle the pieces of the old image, prepare the new image
-            random.shuffle(blocks)
-            sigil_width = factor.factors(len(blocks))[-1][0] * self.chop_width.get()
-            sigil_height = factor.factors(len(blocks))[-1][1] * self.chop_height.get()
+            # prepare the new image
+            if factors.factor_combinations(len(blocks))[-1][1] > (3 * factors.factor_combinations(len(blocks))[-1][0]):
+                sigil_width = math.ceil(math.sqrt(len(blocks))) * self.chop_width.get()
+                sigil_height = math.ceil(math.sqrt(len(blocks))) * self.chop_height.get()
+                blanks = (math.ceil(math.sqrt(len(blocks))) ** 2) - len(blocks) + 1
+                for x in range(1, blanks):
+                    blocks.append(Image.new('RGB', (self.chop_width.get(), self.chop_height.get()), color=background_color))
+            else:
+                sigil_width = factors.factor_combinations(len(blocks))[-1][0] * self.chop_width.get()
+                sigil_height = factors.factor_combinations(len(blocks))[-1][1] * self.chop_height.get()
             x, y = 0, 0
             position = (x, y)
             sigil = Image.new('RGB', (sigil_width, sigil_height), 'white')
 
-            # put the pieces into place
+            # shuffle and put the pieces into place
+            random.shuffle(blocks)
             for b in blocks:
                 sigil.paste(b, box=position)
                 if (position[0] + self.chop_width.get()) < sigil_width:
