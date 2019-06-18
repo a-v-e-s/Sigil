@@ -9,7 +9,7 @@ Author: Jon David Tannehill
 from PIL import Image, ImageFont, ImageDraw, ImageOps
 import tkinter as tk
 from tkinter.filedialog import askdirectory
-import subprocess, os, sys, random, math, factors
+import os, sys, random, math, factors
 
 
 class Gui():
@@ -118,7 +118,9 @@ class Gui():
 
     def make_sigil(self):
         # would this work on Windows? Do I care????
-        font_options = [x for x in subprocess.getoutput('ls fonts').split() if x.endswith('tf')]
+        font_options = []
+        for x in os.listdir('fonts'):
+            font_options.append(os.path.join(os.getcwd(), 'fonts', x))
 
         for a in self.phrases:
             # make an image out of the text in each entry
