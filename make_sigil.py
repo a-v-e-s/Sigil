@@ -117,7 +117,6 @@ class Gui():
         
 
     def make_sigil(self):
-        # would this work on Windows? Do I care????
         font_options = []
         for x in os.listdir('fonts'):
             font_options.append(os.path.join(os.getcwd(), 'fonts', x))
@@ -168,7 +167,7 @@ class Gui():
                 sigil_height = math.ceil(math.sqrt(len(blocks))) * self.chop_height.get()
                 blanks = (math.ceil(math.sqrt(len(blocks))) ** 2) - len(blocks) + 1
                 for x in range(1, blanks):
-                    if background_color:
+                    if self.colorized.get():
                        blocks.append(Image.new('RGB', (self.chop_width.get(), self.chop_height.get()), color=background_color))
                     else:
                         blocks.append(Image.new('RGB', (self.chop_width.get(), self.chop_height.get()), color=(255,255,255)))
@@ -191,15 +190,15 @@ class Gui():
                 position = (x, y)
 
             # save and display, in specific directory if one is requested
-            if os.path.isdir(self.dir.get()):
-                curdir = os.getcwd()
-                os.chdir(self.dir.get())
-            sigil.save(''.join([str(ord(x)) for x in text[-4:]]) + '.png', 'PNG')
+            #if os.path.isdir(self.dir.get()):
+            #    curdir = os.getcwd()
+            #    os.chdir(self.dir.get())
+            sigil.save(os.path.join(self.dir.get(), ''.join([str(ord(x)) for x in text[-4:]]) + '.png'), 'PNG')
             sigil.show()
         
         # if we changed directories, change back
-        if curdir:
-            os.chdir(curdir)
+        #if curdir:
+        #    os.chdir(curdir)
             
 
 if __name__ == '__main__':
