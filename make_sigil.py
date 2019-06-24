@@ -189,16 +189,9 @@ class Gui():
                     y += self.chop_height.get()
                 position = (x, y)
 
-            # save and display, in specific directory if one is requested
-            #if os.path.isdir(self.dir.get()):
-            #    curdir = os.getcwd()
-            #    os.chdir(self.dir.get())
+            # save and display the sigil:
             sigil.save(os.path.join(self.dir.get(), ''.join([str(ord(x)) for x in text[-4:]]) + '.png'), 'PNG')
             sigil.show()
-        
-        # if we changed directories, change back
-        #if curdir:
-        #    os.chdir(curdir)
             
 
 if __name__ == '__main__':
