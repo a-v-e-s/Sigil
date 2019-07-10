@@ -18,57 +18,55 @@ class Gui():
         self.root = tk.Tk()
         self.root.title('Sigil Maker')
         tk.Label(self.root, text='Enter the text you wish to turn into a sigil:').grid(row=1, column=1, columnspan=2)
-        self.rownum = 10
+        self.rownum = 9
         self.phrases = []
         self.entries = []
         self.chop_width = tk.IntVar()
         self.chop_height = tk.IntVar()
+        # These may later be turned into regular ints, but for now I'm keeping them as tkinter IntVars
+        # in case I decide to allow the user to adjust them again as I did in the previous version.
+        self.chop_width.set(10)
+        self.chop_height.set(10)
         self.colorized = tk.IntVar()
+        self.show = tk.IntVar()
         self.dir = tk.StringVar()
         a = tk.Button(self.root)
         b = tk.Button(self.root)
         c = tk.Label(self.root)
-        d = tk.Scale(self.root)
-        e = tk.Label(self.root)        
-        f = tk.Scale(self.root)
+        d = tk.Checkbutton(self.root)
+        e = tk.Label(self.root)
+        f = tk.Checkbutton(self.root)
         g = tk.Label(self.root)
-        h = tk.Checkbutton(self.root)
-        i = tk.Label(self.root)
-        j = tk.Entry(self.root)
-        k = tk.Button(self.root)
+        h = tk.Entry(self.root)
+        i = tk.Button(self.root)
         z = tk.Button(self.root)
-        self.widgets = [a, b, c, d, e, f, g, h, i, j, k, z]
+        self.widgets = [a, b, c, d, e, f, g, h, i, z]
         a.configure(text='Add Another', command=self.add_entry)
-        a.grid(row=self.rownum-6, column=1)
+        a.grid(row=self.rownum-5, column=1)
         b.configure(text='Delete Previous', command=self.remove)
-        b.grid(row=self.rownum-6, column=2)
-        c.configure(text='Chop width:')
-        c.grid(row=self.rownum-5, column=1)
-        d.configure(from_=8, to=16, variable=self.chop_width, orient='horizontal')
-        d.grid(row=self.rownum-5, column=2)
-        e.configure(text='Chop height:')
-        e.grid(row=self.rownum-4, column=1)
-        f.configure(from_=8, to=16, variable=self.chop_height, orient='horizontal')
-        f.grid(row=self.rownum-4, column=2)
-        g.configure(text='Colorize:')
-        g.grid(row=self.rownum-3, column=1)
-        h.configure(variable=self.colorized, offvalue=0, onvalue=1)
-        h.grid(row=self.rownum-3, column=2)
-        i.configure(text='\n\nChoose folder to save images in or default to current:')
-        i.grid(row=self.rownum-2, column=1)
-        j.configure(textvariable=self.dir, width=40)
-        j.grid(row=self.rownum-1, column=1)
-        k.configure(text='Browse', command=(lambda x=j:[x.delete(0, len(x.get())), x.insert(0, askdirectory())]))
-        k.grid(row=self.rownum-1, column=2)
+        b.grid(row=self.rownum-5, column=2)
+        c.configure(text='Colorize:')
+        c.grid(row=self.rownum-4, column=1)
+        d.configure(variable=self.colorized, offvalue=0, onvalue=1)
+        d.grid(row=self.rownum-4, column=2)
+        e.configure(text='Automatically show resulting image?')
+        e.grid(row=self.rownum-3, column=1)
+        f.configure(variable=self.show, offvalue=0, onvalue=1)
+        f.grid(row=self.rownum-3, column=2)
+        g.configure(text='\nChoose folder to save images in or default to\n' + os.getcwd() + ':')
+        g.grid(row=self.rownum-2, column=1)
+        h.configure(textvariable=self.dir, width=40)
+        h.grid(row=self.rownum-1, column=1)
+        i.configure(text='Browse', command=(lambda x=h:[x.delete(0, len(x.get())), x.insert(0, askdirectory())]))
+        i.grid(row=self.rownum-1, column=2)
         z.configure(text='Go!', command=self.make_sigil)
         z.grid(row=self.rownum, column=1, columnspan=2)
 
         # add room for two statements, and set the options to their defaults
         self.add_entry()
         self.add_entry()
-        self.chop_width.set(10)
-        self.chop_height.set(10)
-        h.deselect()
+        d.deselect()
+        f.deselect()
         self.entries[0].focus_set()
         
         # keybindings
@@ -102,18 +100,16 @@ class Gui():
 
     
     def reposition(self):
-        self.widgets[0].grid(row=self.rownum-6, column=1)
-        self.widgets[1].grid(row=self.rownum-6, column=2)
-        self.widgets[2].grid(row=self.rownum-5, column=1)
-        self.widgets[3].grid(row=self.rownum-5, column=2)
-        self.widgets[4].grid(row=self.rownum-4, column=1)
-        self.widgets[5].grid(row=self.rownum-4, column=2)
-        self.widgets[6].grid(row=self.rownum-3, column=1)
-        self.widgets[7].grid(row=self.rownum-3, column=2)
-        self.widgets[8].grid(row=self.rownum-2, column=1)
-        self.widgets[9].grid(row=self.rownum-1, column=1)
-        self.widgets[10].grid(row=self.rownum-1, column=2)
-        self.widgets[11].grid(row=self.rownum, column=1, columnspan=2)
+        self.widgets[0].grid(row=self.rownum-5, column=1)
+        self.widgets[1].grid(row=self.rownum-5, column=2)
+        self.widgets[2].grid(row=self.rownum-4, column=1)
+        self.widgets[3].grid(row=self.rownum-4, column=2)
+        self.widgets[4].grid(row=self.rownum-3, column=1)
+        self.widgets[5].grid(row=self.rownum-3, column=2)
+        self.widgets[6].grid(row=self.rownum-2, column=1)
+        self.widgets[7].grid(row=self.rownum-1, column=1)
+        self.widgets[8].grid(row=self.rownum-1, column=2)
+        self.widgets[9].grid(row=self.rownum, column=1, columnspan=2)
         
 
     def make_sigil(self):
@@ -191,7 +187,8 @@ class Gui():
 
             # save and display the sigil:
             sigil.save(os.path.join(self.dir.get(), ''.join([str(ord(x)) for x in text[-4:]]) + '.png'), 'PNG')
-            sigil.show()
+            if self.show.get() == 1:
+                sigil.show()
             
 
 if __name__ == '__main__':
