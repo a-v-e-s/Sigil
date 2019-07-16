@@ -1,5 +1,6 @@
 """
 factor.py: A function to find all factors of any given integer.
+Is something like this not in the standard library somewhere???
 
 Author: Jon David Tannehill
 """
@@ -28,5 +29,7 @@ def factor_combinations(n):
     return combinations
 
 if __name__ == '__main__':
-    print('Factors of ', sys.argv[1], ': ', factors(int(sys.argv[1])), sep='')
-    print('Combinations of ', sys.argv[1], "'s factors: ", factor_combinations(int(sys.argv[1])), sep='')
+    print('Factors of ', sys.argv[1], ': ', factors(int(sys.argv[1])),
+        sep='')
+    print('Combinations of ', sys.argv[1], "'s factors: ",
+        factor_combinations(int(sys.argv[1])), sep='')
