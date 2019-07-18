@@ -167,16 +167,16 @@ class Gui():
                 for h in range(0, img_height, self.chop_height.get()):
                     # are the elif, else conditions still necessary now
                     # that original canvas size is modified?
-                    if (w + self.chop_width.get() < img_width) and
-                        (h + self.chop_height.get() < img_height):
+                    if ((w + self.chop_width.get() < img_width) and
+                        (h + self.chop_height.get() < img_height)):
                         box = (w, h, w+self.chop_width.get(),
                             h+self.chop_height.get())
-                    elif (w + self.chop_width.get() < img_width) and
-                        (h + self.chop_height.get() >= img_height):
+                    elif ((w + self.chop_width.get() < img_width) and
+                        (h + self.chop_height.get() >= img_height)):
                         box = (w, h, w+self.chop_width.get(),
                             img_height)
-                    elif (w + self.chop_width.get() >= img_width) and
-                        (h + self.chop_height.get() < img_height):
+                    elif ((w + self.chop_width.get() >= img_width) and
+                        (h + self.chop_height.get() < img_height)):
                         box = (w, h, img_width,
                             h+self.chop_height.get())
                     else:
@@ -184,14 +184,14 @@ class Gui():
                     blocks.append(canvas.crop(box))
             
             # prepare the new image
-            if factors.factor_combinations(len(blocks))[-1][1] >
-                (3 * factors.factor_combinations(len(blocks))[-1][0]):
-                sigil_width = math.ceil(math.sqrt(len(blocks))) *
-                    self.chop_width.get()
-                sigil_height = math.ceil(math.sqrt(len(blocks))) *
-                    self.chop_height.get()
-                blanks = (math.ceil(math.sqrt(len(blocks))) ** 2) -
-                    len(blocks) + 1
+            if (factors.factor_combinations(len(blocks))[-1][1] >
+                (3 * factors.factor_combinations(len(blocks))[-1][0])):
+                sigil_width = (math.ceil(math.sqrt(len(blocks))) *
+                    self.chop_width.get())
+                sigil_height = (math.ceil(math.sqrt(len(blocks))) *
+                    self.chop_height.get())
+                blanks = ((math.ceil(math.sqrt(len(blocks))) ** 2) -
+                    len(blocks) + 1)
                 for x in range(1, blanks):
                     if self.colorized.get():
                        blocks.append(Image.new('RGB',
