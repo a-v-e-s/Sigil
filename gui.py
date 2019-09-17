@@ -8,9 +8,9 @@ class Gui():
     def __init__(self):
         # initialize the widgets, variables, etc.
         self.root = tk.Tk()
-        self.root.title('Sigil Maker')
+        self.root.title('Image Maker')
         tk.Label(self.root, text='Enter the text you wish to turn into'
-            'a sigil:').grid(row=1, column=1, columnspan=2)
+            'an image:').grid(row=1, column=1, columnspan=2)
         self.rownum = 9
         self.phrases = []
         self.entries = []

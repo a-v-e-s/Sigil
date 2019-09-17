@@ -1,31 +1,31 @@
-import os, math, random
+import os, math, random, factors, make
 from PIL import Image, ImageFont, ImageDraw, ImageOps
 
-def scramble():
+
+def scramble(phrases, chop_width=10, chop_height=10, colorized=1):
     
     font_options = []
     for x in os.listdir('fonts'):
         font_options.append(os.path.join(os.getcwd(), 'fonts', x))
 
-    for a in self.phrases:
+    for phrase in phrases:
         # make an image out of the text in each entry
         # make its size a multiple of the chop_sizes
         font = ImageFont.truetype(font=random.choice(font_options),
             size=48, encoding='unic')
-        text = a.get()
-        text_width, text_height = font.getsize(text)
-        if text_width % self.chop_width.get() != 0:
-            text_width += (self.chop_width.get() -
-                (text_width % self.chop_width.get()))
-        if text_height % self.chop_height.get() != 0:
-            text_height += (self.chop_height.get() -
-                (text_height % self.chop_height.get()))
+        text_width, text_height = font.getsize(phrase)
+        if text_width % chop_width != 0:
+            text_width += (chop_width -
+                (text_width % chop_width))
+        if text_height % chop_height != 0:
+            text_height += (chop_height -
+                (text_height % chop_height))
         canvas = Image.new('L', (text_width, text_height), "white")
         draw = ImageDraw.Draw(canvas)
-        draw.text((0, 0), text, 'black', font)
+        draw.text((0, 0), phrase, 'black', font)
 
         # if user wanted it colorized, colorize it randomly
-        if self.colorized.get():
+        if colorized:
             text_color = (random.choice(range(255)),
                 random.choice(range(255)),
                 random.choice(range(255)))
@@ -44,22 +44,22 @@ def scramble():
         # chop the image of the text up into bite-sized blocks
         img_width, img_height = canvas.size
         blocks = []
-        for w in range(0, img_width, self.chop_width.get()):
-            for h in range(0, img_height, self.chop_height.get()):
+        for w in range(0, img_width, chop_width):
+            for h in range(0, img_height, chop_height):
                 # are the elif, else conditions still necessary now
                 # that original canvas size is modified?
-                if ((w + self.chop_width.get() < img_width) and
-                    (h + self.chop_height.get() < img_height)):
-                    box = (w, h, w+self.chop_width.get(),
-                        h+self.chop_height.get())
-                elif ((w + self.chop_width.get() < img_width) and
-                    (h + self.chop_height.get() >= img_height)):
-                    box = (w, h, w+self.chop_width.get(),
+                if ((w + chop_width < img_width) and
+                    (h + chop_height < img_height)):
+                    box = (w, h, w+chop_width,
+                        h+chop_height)
+                elif ((w + chop_width < img_width) and
+                    (h + chop_height >= img_height)):
+                    box = (w, h, w+chop_width,
                         img_height)
-                elif ((w + self.chop_width.get() >= img_width) and
-                    (h + self.chop_height.get() < img_height)):
+                elif ((w + chop_width >= img_width) and
+                    (h + chop_height < img_height)):
                     box = (w, h, img_width,
-                        h+self.chop_height.get())
+                        h+chop_height)
                 else:
                     box = (w, h, img_width, img_height)
                 blocks.append(canvas.crop(box))
@@ -67,40 +67,42 @@ def scramble():
         # prepare the new image
         if (factors.factor_combinations(len(blocks))[-1][1] >
             (3 * factors.factor_combinations(len(blocks))[-1][0])):
-            sigil_width = (math.ceil(math.sqrt(len(blocks))) *
-                self.chop_width.get())
-            sigil_height = (math.ceil(math.sqrt(len(blocks))) *
-                self.chop_height.get())
+            img_width = (math.ceil(math.sqrt(len(blocks))) *
+                chop_width)
+            img_height = (math.ceil(math.sqrt(len(blocks))) *
+                chop_height)
             blanks = ((math.ceil(math.sqrt(len(blocks))) ** 2) -
                 len(blocks) + 1)
             for x in range(1, blanks):
-                if self.colorized.get():
+                if colorized:
                    blocks.append(Image.new('RGB',
-                        (self.chop_width.get(),
-                        self.chop_height.get()),
+                        (chop_width,
+                        chop_height),
                         color=background_color))
                 else:
                     blocks.append(Image.new('RGB',
-                        (self.chop_width.get(),
-                        self.chop_height.get()),
+                        (chop_width,
+                        chop_height),
                         color=(255,255,255)))
         else:
-            sigil_width = factors.factor_combinations(
-                len(blocks))[-1][0] * self.chop_width.get()
-            sigil_height = factors.factor_combinations(
-                len(blocks))[-1][1] * self.chop_height.get()
+            img_width = factors.factor_combinations(
+                len(blocks))[-1][0] * chop_width
+            img_height = factors.factor_combinations(
+                len(blocks))[-1][1] * chop_height
         x, y = 0, 0
         position = (x, y)
-        sigil = Image.new('RGB', (sigil_width, sigil_height),
+        img = Image.new('RGB', (img_width, img_height),
             'white')
 
         # shuffle and put the pieces into place
         random.shuffle(blocks)
         for b in blocks:
-            sigil.paste(b, box=position)
-            if (position[0] + self.chop_width.get()) < sigil_width:
-                x += self.chop_width.get()
+            img.paste(b, box=position)
+            if (position[0] + chop_width) < img_width:
+                x += chop_width
             else:
                 x = 0
-                y += self.chop_height.get()
+                y += chop_height
             position = (x, y)
+
+        make.make(img, phrase, show=1)

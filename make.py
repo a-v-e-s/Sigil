@@ -1,13 +1,8 @@
-from PIL import Image, ImageFont, ImageDraw, ImageOps
-import os, sys, random, math, factors
+import os
 
 
-def make(mode, phrases,):
-
-
-        # save and display the sigil:
-        sigil.save(os.path.join(self.dir.get(),
-            ''.join([str(ord(x)) for x in text[-4:]]) + '.png'),
-            'PNG')
-        if self.show.get() == 1:
-            sigil.show()
+def make(img, phrase, show=0, dir=os.getcwd()):
+    # save and display the img:
+    img.save(os.path.join(dir, hex(hash(phrase))[2:] + '.png'), 'PNG')
+    if show == 1:
+        img.show()

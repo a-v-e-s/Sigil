@@ -29,7 +29,6 @@ def factor_combinations(n):
     return combinations
 
 if __name__ == '__main__':
-    print('Factors of ', sys.argv[1], ': ', factors(int(sys.argv[1])),
-        sep='')
+    print('Factors of ', sys.argv[1], ': ', factors(int(sys.argv[1])), sep='')
     print('Combinations of ', sys.argv[1], "'s factors: ",
         factor_combinations(int(sys.argv[1])), sep='')
