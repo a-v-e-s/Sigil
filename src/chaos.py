@@ -1,13 +1,13 @@
-import os, math, random, factors, make
+import os, math, random, factors
 from PIL import Image, ImageFont, ImageDraw, ImageOps
 
 
-def scramble(phrases, chop_width=10, chop_height=10, colorized=1):
-    
+def scramble(phrases, colorized=1, chop_width=10, chop_height=10):
     font_options = []
     for x in os.listdir('fonts'):
         font_options.append(os.path.join(os.getcwd(), 'fonts', x))
 
+    random.shuffle(phrases)
     for phrase in phrases:
         # make an image out of the text in each entry
         # make its size a multiple of the chop_sizes
@@ -105,4 +105,4 @@ def scramble(phrases, chop_width=10, chop_height=10, colorized=1):
                 y += chop_height
             position = (x, y)
 
-        make.make(img, phrase, show=1)
+        yield [img, phrase]

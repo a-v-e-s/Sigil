@@ -1,0 +1,2 @@
+def kaleidoscope(phrases):
+    pass
