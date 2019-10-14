@@ -1,0 +1,4 @@
+-use fibonacci sequence to choose letters from user's input to choose starting points for the grid?
+
+pixies/points will become extremely small with large height & width values, but do i really need to account for this?
+figure out how to inflate the image and smooth the pixels out so that it won't take an immense amount of time to calculate for a 500x500 image, for example.
