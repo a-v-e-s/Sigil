@@ -1,38 +1,39 @@
-import random, os, math
+import random, os, multiprocessing
 from factors import factor_combinations
-from PIL import Image, ImageFont, ImageDraw, ImageOps
+from PIL import Image, ImageFilter
+import dual_forces
 
 
-def inkblot(phrases, colorized):
-    font_options = []
-    for x in os.listdir('fonts'):
-        font_options.append(os.path.join(os.getcwd(), 'fonts', x))
-
+def inkblot(phrases, width=1024, height=768):
     random.shuffle(phrases)
+    s_width = width / 4
+    s_height = height / 2
     for phrase in phrases:
-        font = ImageFont.truetype(font=random.choice(font_options), size=48, encoding='unic')
-    	text_width, text_height = font.getsize(phrase)
-    	canvas = Image.new('L', (text_width, text_height), "white")
-    	draw = ImageDraw.Draw(canvas)
-    	draw.text((0, 0), phrase, 'black', font)
-    	pixels = list(canvas.getdata())
+    #
+        p = multiprocessing.Process(target=dual_forces.darken, args=(phrase, s_width, s_height))
+        grid, impressions = p.start()
+        #
+        print('Impressions:', impressions)
+        #
+        img = Image.new('L', (width, height), color=255)
+        pic = img.load()
+        #
+        x = -1
+        y = -1
+        for row in grid:
+            y += 1
+            if y == height:
+                break
+            for pixel in row:
+                x += 1
+                if x == width:
+                    x = -1
+                    break
+                if pixel == 1:
+                    pic[x,y] = 0
+        #
+        img.show()
 
-        pixies = 0
-        for x in pixels:
-            if x != 255:
-                pixies += 1
-        
-        if factor_combinations(len(pixels))[-1][1] > (3 * factor_combinations(len(pixels))[-1][0]):
-            width = math.ceil(math.sqrt(len(pixels)))
-            height = math.ceil(math.sqrt(len(pixels)))
-        else:
-            width = factor_combinations(len(pixels))[-1][0]
-            height = factor_combinations(len(pixels))[-1][1]
 
-        if colorized:
-            background = (random.choice(range(255)), random.choice(range(255)), random.choice(range(255)))
-            img = Image.new(RGB, (width, height), color=background)
-        else:
-            img = Image.new(L, (width, height), color=(255,255,255))
-
-        
+if __name__ == '__main__':
+    inkblot(['debug this phrase, you silly turtle!', 'now debug this one at the same time, if you dare!'], 100, 100)

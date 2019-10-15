@@ -1,35 +1,16 @@
 import random, fibonacci
 
 
-def main(phrase='turd', width=40, height=40):
-    global numbs, points, pixies, grid, inverse, blacks, new_blacks, ford_loops, wild_loops, impressions
-    ford_loops = 0
-    wild_loops = 0
-    impressions = 0
+def darken(phrase, width=256, height=384):
+    fib = fibonacci.make_fibonacci(1000)[4:]
     numbs = [ord(x) for x in phrase]
-    #numbs = list(set(numbs))
-    points = width * height
-    pixies = points // 2
+    width = 256
+    height = 384
     grid = [[8 for x in range(width)] for x in range(height)]
     inverse = [[8 for x in range(width)] for x in range(height)]
-    #
-    # x may now be a list for some reason so beware...
-    #
-    darken(width, height)
-    #
-    print('Done!')
-    print('For loops:', ford_loops)
-    print('While loops:', wild_loops)
-    print('Grid:')
-    for x in grid: print(x)
-    print('Inverse:')
-    for x in inverse: print(x)
-    print('Impressions:', impressions)
-
-
-def darken(width, height):
-    global numbs, points, pixies, grid, inverse, blacks, new_blacks, ford_loops, wild_loops, impressions
-    fib = fibonacci.make_fibonacci(1000)[4:]
+    points = width * height
+    pixies = points // 2
+    impressions = 0
     #
     # set initial coordinates at random:
     x = random.randint(0, width-1)
@@ -51,7 +32,6 @@ def darken(width, height):
     # begin the loop!
     #
     while pixies > 0:
-        wild_loops += 1
         if whitened:
             x = random.randint(0, width-1)
             y = random.randint(0, height-1)
@@ -74,7 +54,6 @@ def darken(width, height):
             new_blacks = [False, 0]
             used = False
         for b in use_first:
-            ford_loops += 1
             y = b[0]
             xc = b[1]
             if xc > 0:
@@ -170,14 +149,13 @@ def darken(width, height):
         else:
             fail_count += 1
             if fail_count > len(grid[0]) // 24:
-                whiten(width, height)
+                grid, inverse, width, height, blacks, numbs, pixies, impressions = whiten(grid, inverse, width, height, blacks, numbs, pixies, impressions)
                 use_first = []
                 fail_count = 0
                 whitened = True
                 continue
             blacks.reverse()
             for c in blacks:
-                ford_loops += 1
                 y = c[0]
                 xc = c[1]
                 if xc > 0:
@@ -272,14 +250,19 @@ def darken(width, height):
                 fail_count += 1
                 blacks.reverse()
                 if fail_count > len(grid[0]) // 24:
-                    whiten(width, height)
+                    grid, inverse, width, height, blacks, numbs, pixies, impressions = whiten(grid, inverse, width, height, blacks, numbs, pixies, impressions)
                     use_first = []
                     fail_count = 0
                     whitened = True
+    #
+    fusion = []
+    for x in range(len(grid)):
+        combined_line = grid[x] + inverse[x]
+        fusion.append(combined_line)
+    return fusion, impressions
 
 
-def whiten(width, height):
-    global numbs, points, pixies, grid, inverse, blacks, impressions
+def whiten(grid, inverse, width, height, blacks, numbs, pixies, impressions):
     fib = fibonacci.make_fibonacci(1000)[4:]
     r = random.choice(blacks)
     y = r[0]
@@ -385,9 +368,9 @@ def whiten(width, height):
                     if whitened == fib[0]:
                         fib.remove(whitened)
                     numbs = numbs[1:] + numbs[:1]
-        if not whitening:
-            print('Whitened:', len(whites))
+    #
+    return grid, inverse, width, height, blacks, numbs, pixies, impressions
 
 
 if __name__ == '__main__':
-    main(phrase='debug this nonsense, you turtle fucker.', width=50, height=50)
+    grid, inverse, impressions = darken(phrase='debug this nonsense, you turtle fucker.')
