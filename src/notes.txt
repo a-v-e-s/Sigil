@@ -1,0 +1,62 @@
+Make it colorized!!!
+Implement multiprocessing!!!
+
+figure out how to inflate the image and smooth the pixels out so that it won't take an immense amount of time to calculate:
+    #
+    100x100 with each pixel acting as a box of 2x2 => 200x200
+    100x100 with each pixel acting as a box of 3x3 => 300x300
+    100x100 with each pixel acting as a box of 4x4 => 400x400
+    100x100 with each pixel acting as a box of 5x5 => 500x500
+    #
+    150x100 with each pixel acting as a box of 2x2 => 300x200
+    150x100 with each pixel acting as a box of 3x3 => 450x300
+    150x100 with each pixel acting as a box of 4x4 => 600x400
+    150x100 with each pixel acting as a box of 5x5 => 750x500
+    #
+    120x90  with each pixel acting as a box of 4x4 => 480x360
+    150x120 with each pixel acting as a box of 4x4 => 600x480
+    120x100 with each pixel acting as a box of 6x6 => 720x600
+    256x256 with each pixel acting as a box of 4x3 => 1024x768
+    512x384 with each pixel acting as a box of 2x2 => 1024x768
+
+Smoothening functions:
+    # import the pillow modules
+    from PIL import Image
+    from PIL import ImageFilter
+    #
+    # Create an Image Object
+    image = Image.open("./lamp.jpg")
+    #
+    # Apply SMOOTH filters
+    smoothenedImage = image.filter(ImageFilter.SMOOTH)
+    moreSmoothenedImage = image.filter(ImageFilter.SMOOTH_MORE)
+    #
+    # Display the original image and the smoothened Images
+    image.show()
+    smoothenedImage.show()
+    moreSmoothenedImage.show()
+
+def test_function():
+    for phrase in phrases:
+	    grid, impressions = darken(phrase, width/4, height/2)
+	    print('Impressions:', impressions)
+	    img = Image.new('L', (width,height), color=255)
+	    pic = img.load()
+	    #
+	    x = -1
+	    y = -1
+	    for row in grid:
+            y += 1
+            if y == height:
+                break
+	    	for pixel in row:
+                x += 1
+                if x == width:
+                    x = -1
+                    break
+	    		if pixel == 1:
+                    pic[x,y] = 0
+        #
+        img.show()
+        img.save((hex(hash(phrase))[2:] + '.png'), 'PNG')
+				
