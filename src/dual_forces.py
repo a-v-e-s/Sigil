@@ -1,11 +1,9 @@
 import random, fibonacci
 
 
-def darken(phrase, width=256, height=384):
+def darken(phrase, width=240, height=360):
     fib = fibonacci.make_fibonacci(1000)[4:]
     numbs = [ord(x) for x in phrase]
-    width = 256
-    height = 384
     grid = [[8 for x in range(width)] for x in range(height)]
     inverse = [[8 for x in range(width)] for x in range(height)]
     points = width * height
@@ -259,6 +257,7 @@ def darken(phrase, width=256, height=384):
     for x in range(len(grid)):
         combined_line = grid[x] + inverse[x]
         fusion.append(combined_line)
+    #
     return fusion, impressions
 
 
@@ -373,4 +372,6 @@ def whiten(grid, inverse, width, height, blacks, numbs, pixies, impressions):
 
 
 if __name__ == '__main__':
-    grid, inverse, impressions = darken(phrase='debug this nonsense, you turtle fucker.')
+    grid, impressions = darken('debug this nonsense, you turtle fucker.', 25, 50)
+    for x in grid:
+        print(x)

@@ -45,14 +45,14 @@ class Gui():
         self.colorized = tk.IntVar()
         self.shown = tk.IntVar()
         tk.Label(self.options, text='Choose Mode:').grid(row=1, column=1, columnspan=3)
-        self.chaos = tk.Radiobutton(self.options, text='Chaos', variable=self.mode, value=1)
-        self.rorshach = tk.Radiobutton(self.options, text='Rorshach', variable=self.mode, value=2, state='disabled')
+        self.colorize = tk.Checkbutton(self.options, variable=self.colorized, offvalue=0, onvalue=1)
+        self.rorshach = tk.Radiobutton(self.options, text='Rorshach', variable=self.mode, value=2, command=(lambda x=self.colorize:[x.configure(state='disabled'), x.deselect()]))
+        self.chaos = tk.Radiobutton(self.options, text='Chaos', variable=self.mode, value=1, command=(lambda x=self.colorize:[x.configure(state='normal')]))
         self.kaleidoscope = tk.Radiobutton(self.options, text='Kaleidoscope', variable=self.mode, value=3, state='disabled')
         self.chaos.grid(row=2, column=1)
         self.rorshach.grid(row=2, column=2)
         self.kaleidoscope.grid(row=2, column=3)
         tk.Label(self.options, text='Colorize:').grid(row=3, column=1, columnspan=2)
-        self.colorize = tk.Checkbutton(self.options, variable=self.colorized, offvalue=0, onvalue=1)
         self.colorize.grid(row=3, column=3)
         tk.Label(self.options, text='Automatically show resulting image?').grid(row=4, column=1, columnspan=2)
         self.show = tk.Checkbutton(self.options, variable=self.shown, offvalue=0, onvalue=1)
@@ -107,10 +107,11 @@ class Gui():
         phrases = []
         for x in self.phrases:
             phrases.append(x.get())
-        if self.mode.get() == 1:
-            imgs = scramble(phrases, self.colorized.get())
-            for x in imgs:
-                make(x[0], x[1], self.shown.get(), self.dir.get())
+        make(phrases, self.mode.get(), self.colorized.get(), self.shown.get(), self.dir.get())
+        #if self.mode.get() == 1:
+        #    imgs = scramble(phrases, self.colorized.get())
+        #    for x in imgs:
+        #        make(x[0], x[1], self.shown.get(), self.dir.get())
         #elif self.mode == 2:
         #    imgs = inkblot(phrases)
         #    for x in imgs:

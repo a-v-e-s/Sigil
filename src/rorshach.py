@@ -4,36 +4,34 @@ from PIL import Image, ImageFilter
 import dual_forces
 
 
-def inkblot(phrases, width=1024, height=768):
+def gen_grid(phrases, width=480, height=360):
     random.shuffle(phrases)
-    s_width = width / 4
-    s_height = height / 2
     for phrase in phrases:
     #
-        p = multiprocessing.Process(target=dual_forces.darken, args=(phrase, s_width, s_height))
-        grid, impressions = p.start()
-        #
+        grid, impressions = dual_forces.darken(phrase, width//2, height)
+        print('Phrase:', phrase)
         print('Impressions:', impressions)
+        img, smoothed, smoother, smoothest = inkblot(grid, width, height)
         #
-        img = Image.new('L', (width, height), color=255)
-        pic = img.load()
-        #
-        x = -1
-        y = -1
-        for row in grid:
-            y += 1
-            if y == height:
-                break
-            for pixel in row:
-                x += 1
-                if x == width:
-                    x = -1
-                    break
-                if pixel == 1:
-                    pic[x,y] = 0
-        #
-        img.show()
+        yield img, smoothed, smoother, smoothest, phrase
+
+
+def inkblot(grid, width, height):
+    img = Image.new('L', (width, height), color=255)
+    pic = img.load()
+    #
+    for y in range(img.size[1]):
+        for x in range(img.size[0]):
+            if grid[y][x] == 1:
+                pic[x,y] = 0
+            else:
+                pic[x,y] = 255
+    #
+    smoothed = img.filter(ImageFilter.SMOOTH)
+    smoother = img.filter(ImageFilter.SMOOTH_MORE)
+    smoothest = smoother.filter(ImageFilter.SMOOTH_MORE)
+    return img, smoothed, smoother, smoothest
 
 
 if __name__ == '__main__':
-    inkblot(['debug this phrase, you silly turtle!', 'now debug this one at the same time, if you dare!'], 100, 100)
+    gen_grid(['debug this phrase, you silly turtle!', 'now debug this one at the same time, if you dare!'], 100, 100)
