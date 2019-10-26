@@ -1,4 +1,4 @@
-import random, fibonacci
+import random, pickle, fibonacci
 
 
 def darken(phrase, width=240, height=360):
@@ -257,8 +257,26 @@ def darken(phrase, width=240, height=360):
     for x in range(len(grid)):
         combined_line = grid[x] + inverse[x]
         fusion.append(combined_line)
+    save_this = (fusion, phrase, impressions)
     #
-    return fusion, impressions
+    try:
+        with open('grids.pkl', 'rb') as f:
+            grids = pickle.load(f)
+        grids.append(save_this)
+        with open('grids.pkl', 'wb') as f:
+            pickle.dump(grids, f)
+    except EOFError:
+        print('grids.pkl is empty. We will start fresh.')
+        grids = []
+        grids.append(save_this)
+        with open('grids.pkl', 'wb') as f:
+            pickle.dump(grids, f)
+    except FileNotFoundError:
+        print('grids.pkl does not exist. We will create it.')
+        grids = []
+        grids.append(save_this)
+        with open('grids.pkl', 'wb') as f:
+            pickle.dump(grids, f)
 
 
 def whiten(grid, inverse, width, height, blacks, numbs, pixies, impressions):

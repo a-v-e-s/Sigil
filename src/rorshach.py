@@ -1,4 +1,4 @@
-import random, os, multiprocessing
+import random, os, multiprocessing, pickle
 from factors import factor_combinations
 from PIL import Image, ImageFilter
 import dual_forces
@@ -6,14 +6,37 @@ import dual_forces
 
 def gen_grid(phrases, width=480, height=360):
     random.shuffle(phrases)
-    for phrase in phrases:
+    processors = multiprocessing.cpu_count()
     #
-        grid, impressions = dual_forces.darken(phrase, width//2, height)
-        print('Phrase:', phrase)
-        print('Impressions:', impressions)
-        img, smoothed, smoother, smoothest = inkblot(grid, width, height)
-        #
-        yield img, smoothed, smoother, smoothest, phrase
+    jobs = []
+    for phrase in phrases:
+        p = multiprocessing.Process(target=dual_forces.darken, args=(phrase, width//2, height))
+        jobs.append(p)
+    if len(jobs) >= processors:
+        print('Dividing up the jobs')
+        while jobs:
+            do_these = jobs[:processors-1]
+            for x in do_these:
+                x.start()
+                print('started:', x)
+            for x in do_these:
+                x.join()
+                print('joined:', x)
+            jobs = jobs[processors-1:]
+    else:
+        for x in jobs:
+            x.start()
+            print('started:', x)
+        for x in jobs:
+            x.join()
+            print('joined:', x)
+    #print('Phrase:', phrase)
+    #print('Impressions:', impressions)
+    with open('grids.pkl', 'rb') as f:
+        grids = pickle.load(f)
+        for x in grids:
+            img, smoothed, smoother, smoothest = inkblot(x[0], width, height)
+            yield img, smoothed, smoother, smoothest, x[1]
 
 
 def inkblot(grid, width, height):
