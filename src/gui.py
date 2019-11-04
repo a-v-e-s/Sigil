@@ -4,7 +4,7 @@ from make import make
 from chaos import scramble
 from rorshach import inkblot
 from kaleidoscope import kaleidoscope
-import os
+import os, threading
 
 
 class Gui():
@@ -107,6 +107,7 @@ class Gui():
         phrases = []
         for x in self.phrases:
             phrases.append(x.get())
+        #thread = threading.Thread(target=make, args=(self.mode.get(), self.colorized.get(), self.shown.get(), self.dir.get())).start()
         make(phrases, self.mode.get(), self.colorized.get(), self.shown.get(), self.dir.get())
         #if self.mode.get() == 1:
         #    imgs = scramble(phrases, self.colorized.get())

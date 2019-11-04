@@ -13,7 +13,7 @@ def make(phrases, mode, colorized=0, show=0, dir=os.getcwd()):
     #
     elif mode == 2:
         import rorshach
-        imgs = rorshach.gen_grid(phrases, width=50, height=50)
+        imgs = rorshach.gen_grid(phrases, width=100, height=100)
         for x in imgs:
             x[0].save(os.path.join(dir, hex(hash(x[4]))[2:] + '.png'), 'PNG')
             x[1].save(os.path.join(dir, hex(hash(x[4]))[2:] + '.smoothed.png'), 'PNG')
@@ -21,7 +21,7 @@ def make(phrases, mode, colorized=0, show=0, dir=os.getcwd()):
             x[3].save(os.path.join(dir, hex(hash(x[4]))[2:] + '.smoothest.png'), 'PNG')
             if show:
                 x[0].show()
-                x[1].show()
-                x[2].show()
-                x[3].show()
+                #x[1].show()
+                #x[2].show()
+                #x[3].show()
         os.remove('grids.pkl')

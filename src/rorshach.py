@@ -35,25 +35,61 @@ def gen_grid(phrases, width=480, height=360):
     with open('grids.pkl', 'rb') as f:
         grids = pickle.load(f)
         for x in grids:
-            img, smoothed, smoother, smoothest = inkblot(x[0], width, height)
-            yield img, smoothed, smoother, smoothest, x[1]
+            img, smoothed, smoother, smoothest = inkblot(x[0], x[1], width, height)
+            yield img, smoothed, smoother, smoothest, x[2]
 
 
-def inkblot(grid, width, height):
-    img = Image.new('L', (width, height), color=255)
-    pic = img.load()
-    #
-    for y in range(img.size[1]):
-        for x in range(img.size[0]):
+def inkblot(grid, inverse, width, height):
+    img1 = Image.new('L', (width//2, height), color=255)
+    pic1 = img1.load()
+    for y in range(img1.size[1]):
+        for x in range(img1.size[0]):
             if grid[y][x] == 1:
-                pic[x,y] = 0
+                pic1[x,y] = 0
             else:
-                pic[x,y] = 255
+                pic1[x,y] = 255
+    img1, pic1 = extend(img1, pic1, 'l')
     #
-    smoothed = img.filter(ImageFilter.SMOOTH)
-    smoother = img.filter(ImageFilter.SMOOTH_MORE)
+    img2 = Image.new('L', (width//2, height), color=255)
+    pic2 = img2.load()
+    for y in range(img2.size[1]):
+        for x in range(img2.size[0]):
+            if inverse[y][x] == 1:
+                pic2[x,y] = 0
+            else:
+                pic2[x,y] = 255
+    img2, pic2 = extend(img2, pic2, 'r')
+    #
+    img1.show()
+    img2.show()
+    fusion = Image.new('L', (width, height), color=255)
+    fusion.paste(img1)
+    fusion.paste(img2, box=(width//2, 0))
+    #
+    smoothed = fusion.filter(ImageFilter.SMOOTH)
+    smoother = fusion.filter(ImageFilter.SMOOTH_MORE)
     smoothest = smoother.filter(ImageFilter.SMOOTH_MORE)
-    return img, smoothed, smoother, smoothest
+    return fusion, smoothed, smoother, smoothest
+
+
+def extend(img, pic, lr):
+    width = img.size[0]
+    height = img.size[1]
+    if lr == 'l':
+        for y in range(height):
+            if pic[width-2, y] == 0:
+                pic[width-1, y] = 0
+        for x in range(width):
+            if pic[x, height-2] == 0:
+                pic[x, height-1] = 0
+    elif lr == 'r':
+        for y in range(height):
+            if pic[1, y] == 0:
+                pic[0, y] = 0
+        for x in range(width):
+            if pic[x, 1] == 0:
+                pic[x, 0] = 0
+    return img, pic
 
 
 if __name__ == '__main__':

@@ -253,12 +253,9 @@ def darken(phrase, width=240, height=360):
                     fail_count = 0
                     whitened = True
     #
-    fusion = []
-    for x in range(len(grid)):
-        combined_line = grid[x] + inverse[x]
-        fusion.append(combined_line)
-    save_this = (fusion, phrase, impressions)
-    #
+    save_this = (grid, inverse, phrase, impressions)
+    print('phrase:', phrase)
+    print('impressions:', impressions)
     try:
         with open('grids.pkl', 'rb') as f:
             grids = pickle.load(f)
