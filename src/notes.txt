@@ -1,3 +1,7 @@
-Make it colorized!!!
-Create progress monitor, stop Go button from staying punched in until the process finishes. 
-threading.Thread(args).start() doesn't work properly for some reason.
+Make the inkblots colorized!!!
+
+make main gui look better.
+change it so that different options appear or disappear depending on the chosen mode.
+
+clean up the codebase. it is an absolute mess.
+make the repo more professional looking and make the src folder scripts accessible from the top level directory.

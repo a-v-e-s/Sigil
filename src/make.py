@@ -1,7 +1,7 @@
 import os
 
 
-def make(phrases, mode, colorized=0, show=0, dir=os.getcwd()):
+def make(phrases, mode, colorized=0, show=0, dir=os.getcwd(), pipe=None):
     if mode == 1:
         from chaos import scramble
         imgs = scramble(phrases, colorized=1)
@@ -21,7 +21,7 @@ def make(phrases, mode, colorized=0, show=0, dir=os.getcwd()):
             x[3].save(os.path.join(dir, hex(hash(x[4]))[2:] + '.smoothest.png'), 'PNG')
             if show:
                 x[0].show()
-                #x[1].show()
-                #x[2].show()
-                #x[3].show()
+                x[1].show()
+                x[2].show()
+                x[3].show()
         os.remove('grids.pkl')

@@ -1,17 +1,37 @@
-import random, os, multiprocessing, pickle
+import random, os, multiprocessing, pickle, queue, time, threading
+import tkinter as tk
 from factors import factor_combinations
 from PIL import Image, ImageFilter
-import dual_forces
+from multiprocessing.managers import SyncManager
+import dual_forces, cfg
+from sys import exc_info
 
 
 def gen_grid(phrases, width=480, height=360):
     random.shuffle(phrases)
     processors = multiprocessing.cpu_count()
     #
+    progress = tk.Toplevel()
+    progress.title('Progress')
+    m = SyncManager()
+    m.start()
+    q = m.dict()
+    #
     jobs = []
+    labels = []
+    rownum = 0
     for phrase in phrases:
-        p = multiprocessing.Process(target=dual_forces.darken, args=(phrase, width//2, height))
+        rownum += 1
+        codename = hex(hash(phrase))[2:]
+        name = tk.Label(progress, text=codename)
+        name.grid(row=rownum, column=1)
+        numb = tk.Label(progress, text=0)
+        numb.grid(row=rownum, column=2)
+        labels.append([name, numb])
+        q[codename] = 0
+        p = multiprocessing.Process(target=dual_forces.darken, args=(phrase, q, width//2, height))
         jobs.append(p)
+    threading.Thread(target=updater, args=(jobs, labels, q)).start()
     if len(jobs) >= processors:
         print('Dividing up the jobs')
         while jobs:
@@ -30,6 +50,7 @@ def gen_grid(phrases, width=480, height=360):
         for x in jobs:
             x.join()
             print('joined:', x)
+        del jobs
     #print('Phrase:', phrase)
     #print('Impressions:', impressions)
     with open('grids.pkl', 'rb') as f:
@@ -73,6 +94,8 @@ def inkblot(grid, inverse, width, height):
 
 
 def extend(img, pic, lr):
+    # fixes a bug where the image has blank lines on 2 of the edges
+    # I tried every other way I could think of to fix it...didn't work out.
     width = img.size[0]
     height = img.size[1]
     if lr == 'l':
@@ -90,6 +113,33 @@ def extend(img, pic, lr):
             if pic[x, 1] == 0:
                 pic[x, 0] = 0
     return img, pic
+
+
+def updater(jobs, labels, q):
+    while True:
+        time.sleep(0.5)
+        print(jobs[0].is_alive())
+        for x in q.keys():
+            for y in labels:
+                if y[0].cget('text') == x:
+                    y[1].configure(text=q[x])
+        if still_alive(jobs):
+            continue
+        else:
+            break
+    #
+    # one last time:
+    for x in q.keys():
+        for y in labels:
+            if y[0].cget('text') == x:
+                y[1].configure(text=q[x])
+
+
+def still_alive(jobs):
+    for x in jobs:
+        if x.is_alive():
+            return True
+    return False
 
 
 if __name__ == '__main__':

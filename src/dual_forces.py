@@ -1,7 +1,9 @@
 import random, pickle, fibonacci
+from sys import exc_info
 
 
-def darken(phrase, width=240, height=360):
+def darken(phrase, q, width=240, height=360):
+    codename = hex(hash(phrase))[2:]
     fib = fibonacci.make_fibonacci(1000)[4:]
     numbs = [ord(x) for x in phrase]
     grid = [[8 for x in range(width)] for x in range(height)]
@@ -30,6 +32,10 @@ def darken(phrase, width=240, height=360):
     # begin the loop!
     #
     while pixies > 0:
+        try:
+            q[codename] = impressions
+        except Exception:
+            print(exc_info())
         if whitened:
             x = random.randint(0, width-1)
             y = random.randint(0, height-1)
@@ -147,7 +153,7 @@ def darken(phrase, width=240, height=360):
         else:
             fail_count += 1
             if fail_count > len(grid[0]) // 24:
-                grid, inverse, width, height, blacks, numbs, pixies, impressions = whiten(grid, inverse, width, height, blacks, numbs, pixies, impressions)
+                grid, inverse, width, height, blacks, numbs, pixies, q, impressions = whiten(grid, inverse, width, height, blacks, numbs, pixies, q, codename, impressions)
                 use_first = []
                 fail_count = 0
                 whitened = True
@@ -248,14 +254,18 @@ def darken(phrase, width=240, height=360):
                 fail_count += 1
                 blacks.reverse()
                 if fail_count > len(grid[0]) // 24:
-                    grid, inverse, width, height, blacks, numbs, pixies, impressions = whiten(grid, inverse, width, height, blacks, numbs, pixies, impressions)
+                    grid, inverse, width, height, blacks, numbs, pixies, q, impressions = whiten(grid, inverse, width, height, blacks, numbs, pixies, q, codename, impressions)
                     use_first = []
                     fail_count = 0
                     whitened = True
     #
     save_this = (grid, inverse, phrase, impressions)
-    print('phrase:', phrase)
-    print('impressions:', impressions)
+    try:
+        q[codename] = impressions
+    except Exception:
+        print(exc_info())
+    #print('phrase:', phrase)
+    #print('impressions:', impressions)
     try:
         with open('grids.pkl', 'rb') as f:
             grids = pickle.load(f)
@@ -276,7 +286,7 @@ def darken(phrase, width=240, height=360):
             pickle.dump(grids, f)
 
 
-def whiten(grid, inverse, width, height, blacks, numbs, pixies, impressions):
+def whiten(grid, inverse, width, height, blacks, numbs, pixies, q, codename, impressions):
     fib = fibonacci.make_fibonacci(1000)[4:]
     r = random.choice(blacks)
     y = r[0]
@@ -291,6 +301,10 @@ def whiten(grid, inverse, width, height, blacks, numbs, pixies, impressions):
     use_first = []
     whitening = True
     while whitening:
+        try:
+            q[codename] = impressions
+        except Exception:
+            print(exc_info())
         whitening = False
         for a in range(-1, (new_whites[1] - 1), -1):
             use_first.append(whites[a])
@@ -383,7 +397,7 @@ def whiten(grid, inverse, width, height, blacks, numbs, pixies, impressions):
                         fib.remove(whitened)
                     numbs = numbs[1:] + numbs[:1]
     #
-    return grid, inverse, width, height, blacks, numbs, pixies, impressions
+    return grid, inverse, width, height, blacks, numbs, pixies, q, impressions
 
 
 if __name__ == '__main__':
