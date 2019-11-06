@@ -1,16 +1,19 @@
+"""
+gui.py
+
+The top-level script for this repository.
+Provides a graphical frontend for encoding language into an image
+"""
+
 import tkinter as tk
 from tkinter.filedialog import askdirectory
 from make import make
-from chaos import scramble
-from rorshach import inkblot
-from kaleidoscope import kaleidoscope
-import os, threading, time
+import os, threading
 
 
 class Gui():
     def __init__(self):
-        
-        # initialize the widgets, variables, etc.
+        # initialize the root widget and its frames:
         self.root = tk.Tk()
         self.root.title('Image Maker')
         self.text = tk.Frame(self.root)
@@ -19,8 +22,8 @@ class Gui():
         self.text.pack()
         self.options.pack()
         self.operation.pack()
-        
         #
+        # fill out the text frame:
         tk.Label(self.text, text='Enter the text you wish to turn into an image:').grid(row=1, column=1, columnspan=2)
         self.rownum = 2
         self.phrases = []
@@ -33,32 +36,38 @@ class Gui():
         self.add_entry()
         self.reposition()
         self.entries[0].focus_set()
-        
         #
-        self.chop_width = tk.IntVar()
-        self.chop_height = tk.IntVar()
-        self.chop_width.set(10)
-        self.chop_height.set(10)
-        
+        # these should maybe be removed. They are the defaults in chaos.py:
+        #self.chop_width = tk.IntVar()
+        #self.chop_height = tk.IntVar()
+        #self.chop_width.set(10)
+        #self.chop_height.set(10)
         #
+        # fill out the options frame:
         self.mode = tk.IntVar()
         self.colorized = tk.IntVar()
+        self.blurring = tk.IntVar()
         self.shown = tk.IntVar()
         tk.Label(self.options, text='Choose Mode:').grid(row=1, column=1, columnspan=3)
-        self.colorize = tk.Checkbutton(self.options, variable=self.colorized, offvalue=0, onvalue=1)
-        self.rorshach = tk.Radiobutton(self.options, text='Rorshach', variable=self.mode, value=2, command=(lambda x=self.colorize:[x.configure(state='disabled'), x.deselect()]))
-        self.chaos = tk.Radiobutton(self.options, text='Chaos', variable=self.mode, value=1, command=(lambda x=self.colorize:[x.configure(state='normal')]))
+        self.rorshach = tk.Radiobutton(self.options, text='Rorshach', variable=self.mode, value=2, command=self.rorsh_mode)
+        self.chaos = tk.Radiobutton(self.options, text='Chaos', variable=self.mode, value=1, command=self.chaos_mode)
         self.kaleidoscope = tk.Radiobutton(self.options, text='Kaleidoscope', variable=self.mode, value=3, state='disabled')
         self.chaos.grid(row=2, column=1)
         self.rorshach.grid(row=2, column=2)
         self.kaleidoscope.grid(row=2, column=3)
         tk.Label(self.options, text='Colorize:').grid(row=3, column=1, columnspan=2)
+        self.colorize = tk.Checkbutton(self.options, variable=self.colorized, offvalue=0, onvalue=1)
         self.colorize.grid(row=3, column=3)
-        tk.Label(self.options, text='Automatically show resulting image?').grid(row=4, column=1, columnspan=2)
+        tk.Label(self.options, text='Blur:').grid(row=4, column=1, columnspan=2)
+        self.blur = tk.Scale(self.options, variable=self.blurring, orient='horizontal', from_=0, to=3)
+        self.blur.grid(row=4, column=3)
+        tk.Label(self.options, text='Automatically show resulting image?').grid(row=5, column=1, columnspan=2)
         self.show = tk.Checkbutton(self.options, variable=self.shown, offvalue=0, onvalue=1)
-        self.show.grid(row=4, column=3)
-        
+        self.show.grid(row=5, column=3)
+        self.mode.set(2)
+        self.rorsh_mode()
         #
+        # fill out the operation frame:
         self.dir = tk.StringVar()
         tk.Label(self.operation, text='\nChoose folder to save images in or default to:\n' + os.getcwd()).grid(row=1, column=1, columnspan=2)
         self.directory = tk.Entry(self.operation, textvariable=self.dir, width=40)
@@ -67,7 +76,7 @@ class Gui():
         self.directory_menu.grid(row=2, column=2)
         self.start = tk.Button(self.operation, text='Go!', command=self.go)
         self.start.grid(row=3, column=1, columnspan=2)
-        
+        #
         # keybindings
         self.root.bind(sequence='<Return>', func=(lambda x: self.go()))
         self.root.bind(sequence='<Control-KeyPress-n>', func=(lambda y=self.add_entry: self.add_entry()))
@@ -81,7 +90,7 @@ class Gui():
         entry.grid(row=self.rownum, column=1, columnspan=2)
         self.phrases.append(text)
         self.entries.append(entry)
-        
+        #
         # adjust other widgets accordingly
         self.rownum += 1
         self.reposition()
@@ -92,24 +101,41 @@ class Gui():
         del self.phrases[-1]
         self.entries[-1].grid_forget()
         del self.entries[-1]
-
+        #
         # adjust widgets accordingly
         self.rownum -= 1
         self.reposition()
 
     
     def reposition(self):
+        # move the add and delete buttons into the proper location:
         self.add.grid(row=self.rownum, column=1)
         self.delete.grid(row=self.rownum, column=2)
 
 
+    def rorsh_mode(self):
+        # adjust options widgets:
+        self.colorize.configure(state='disabled')
+        self.colorize.deselect()
+        self.blur.configure(state='normal')
+
+
+    def chaos_mode(self):
+        # adjust options widgets:
+        self.blur.configure(state='disabled')
+        self.blurring.set(0)
+        self.colorize.configure(state='normal')
+
+
     def go(self):
+        # append all phrases to a list and start make.make() in its own thread:
         phrases = []
         for x in self.phrases:
             phrases.append(x.get())
-        threading.Thread(target=make, args=(phrases, self.mode.get(), self.colorized.get(), self.shown.get(), self.dir.get())).start()
+        threading.Thread(target=make, args=(phrases, self.mode.get(), self.colorized.get(), self.blurring.get(), self.shown.get(), self.dir.get())).start()
 
 
 if __name__ == '__main__':
+    # initialize the gui:
     gui = Gui()
     gui.root.mainloop()

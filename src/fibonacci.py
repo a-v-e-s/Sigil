@@ -58,7 +58,7 @@ def nth_fibonacci(num, range_=1000, include_F0=True):
         print('Try again with a higher range or reconsider whether the calculation you are requesting is reasonable.')
         return None
     try:
-        return sequence.index(num)
+        return sequence.index(num) + 1
     except ValueError:
         print(str(num) + ' is not a fibonacci number')
         return None

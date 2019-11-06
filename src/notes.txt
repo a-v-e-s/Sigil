@@ -1,7 +1,4 @@
 Make the inkblots colorized!!!
 
-make main gui look better.
-change it so that different options appear or disappear depending on the chosen mode.
-
-clean up the codebase. it is an absolute mess.
+clean up the codebase. Add documentation.
 make the repo more professional looking and make the src folder scripts accessible from the top level directory.

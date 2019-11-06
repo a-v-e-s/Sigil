@@ -1,66 +1,75 @@
-import random, os, multiprocessing, pickle, queue, time, threading
+"""
+rorshach.py
+
+Creates and manages processes for each phrase supplied by the user, calling dual_forces.darken() on each one.
+Waits for these processes to complete before turning each grid saved in grids.pkl into a png image.
+Monitors progress so the user doesn't suspect the application is frozen or doing nothing.
+"""
+
+import random, multiprocessing, pickle, time, threading
 import tkinter as tk
-from factors import factor_combinations
 from PIL import Image, ImageFilter
 from multiprocessing.managers import SyncManager
-import dual_forces, cfg
 from sys import exc_info
+import dual_forces
 
 
-def gen_grid(phrases, width=480, height=360):
+def gen_grid(phrases, blur=0, width=480, height=360):
+    # shuffle phrases, prepare for multiprocessing:
     random.shuffle(phrases)
     processors = multiprocessing.cpu_count()
-    #
-    progress = tk.Toplevel()
-    progress.title('Progress')
     m = SyncManager()
     m.start()
-    q = m.dict()
+    progress = m.dict()
     #
+    # begin constructing progress monitor:
+    monitor = tk.Toplevel()
+    monitor.title('Progress Monitor')
+    tk.Label(monitor, text='Codename:').grid(row=1, column=1)
+    tk.Label(monitor, text='Phrase factored into image x times:').grid(row=1, column=2)
+    #
+    # create a Process instance and set of labels for each phrase:
     jobs = []
     labels = []
-    rownum = 0
+    rownum = 1
     for phrase in phrases:
         rownum += 1
         codename = hex(hash(phrase))[2:]
-        name = tk.Label(progress, text=codename)
+        name = tk.Label(monitor, text=codename)
         name.grid(row=rownum, column=1)
-        numb = tk.Label(progress, text=0)
+        numb = tk.Label(monitor, text=0)
         numb.grid(row=rownum, column=2)
         labels.append([name, numb])
-        q[codename] = 0
-        p = multiprocessing.Process(target=dual_forces.darken, args=(phrase, q, width//2, height))
+        progress[codename] = 0
+        p = multiprocessing.Process(target=dual_forces.darken, args=(phrase, progress, width//2, height))
         jobs.append(p)
-    threading.Thread(target=updater, args=(jobs, labels, q)).start()
+    #
+    # set the Processes and progress monitor into motion:
+    threading.Thread(target=updater, args=(jobs, labels, progress)).start()
     if len(jobs) >= processors:
-        print('Dividing up the jobs')
         while jobs:
             do_these = jobs[:processors-1]
             for x in do_these:
                 x.start()
-                print('started:', x)
             for x in do_these:
                 x.join()
-                print('joined:', x)
             jobs = jobs[processors-1:]
     else:
         for x in jobs:
             x.start()
-            print('started:', x)
         for x in jobs:
             x.join()
-            print('joined:', x)
-        del jobs
-    #print('Phrase:', phrase)
-    #print('Impressions:', impressions)
+    #
+    # retrieve the grids, turn them into images and yield them and their codename:
     with open('grids.pkl', 'rb') as f:
         grids = pickle.load(f)
         for x in grids:
-            img, smoothed, smoother, smoothest = inkblot(x[0], x[1], width, height)
-            yield img, smoothed, smoother, smoothest, x[2]
+            img = inkblot(x[0], x[1], blur, width, height)
+            yield img, x[2]
 
 
-def inkblot(grid, inverse, width, height):
+def inkblot(grid, inverse, blur, width, height):
+    # create an image, use grid to fill in its pixels:
     img1 = Image.new('L', (width//2, height), color=255)
     pic1 = img1.load()
     for y in range(img1.size[1]):
@@ -71,6 +80,7 @@ def inkblot(grid, inverse, width, height):
                 pic1[x,y] = 255
     img1, pic1 = extend(img1, pic1, 'l')
     #
+    # do the same, but for the inverse grid:
     img2 = Image.new('L', (width//2, height), color=255)
     pic2 = img2.load()
     for y in range(img2.size[1]):
@@ -79,18 +89,24 @@ def inkblot(grid, inverse, width, height):
                 pic2[x,y] = 0
             else:
                 pic2[x,y] = 255
+    # fixes a weird bug that I couldn't seem to resolve any other way
     img2, pic2 = extend(img2, pic2, 'r')
     #
-    img1.show()
-    img2.show()
+    # combine the images:
     fusion = Image.new('L', (width, height), color=255)
     fusion.paste(img1)
     fusion.paste(img2, box=(width//2, 0))
     #
-    smoothed = fusion.filter(ImageFilter.SMOOTH)
-    smoother = fusion.filter(ImageFilter.SMOOTH_MORE)
-    smoothest = smoother.filter(ImageFilter.SMOOTH_MORE)
-    return fusion, smoothed, smoother, smoothest
+    # make the less pixelated if the user requested it:
+    if blur == 1:
+        fusion = fusion.filter(ImageFilter.SMOOTH)
+    elif blur == 2:
+        fusion = fusion.filter(ImageFilter.SMOOTH_MORE)
+    elif blur == 3:
+        fusion = fusion.filter(ImageFilter.SMOOTH_MORE)
+        fusion = fusion.filter(ImageFilter.SMOOTH_MORE)
+    #
+    return fusion
 
 
 def extend(img, pic, lr):
@@ -115,27 +131,31 @@ def extend(img, pic, lr):
     return img, pic
 
 
-def updater(jobs, labels, q):
+def updater(jobs, labels, progress):
+    # update the number of impressions for each image until jobs are done
     while True:
         time.sleep(0.5)
-        print(jobs[0].is_alive())
-        for x in q.keys():
-            for y in labels:
-                if y[0].cget('text') == x:
-                    y[1].configure(text=q[x])
+        try:
+            for x in progress.keys():
+                for y in labels:
+                    if y[0].cget('text') == x:
+                        y[1].configure(text=progress[x])
+        except Exception:
+            pass
         if still_alive(jobs):
             continue
         else:
             break
     #
-    # one last time:
-    for x in q.keys():
+    # then do it one last time:
+    for x in progress.keys():
         for y in labels:
             if y[0].cget('text') == x:
-                y[1].configure(text=q[x])
+                y[1].configure(text=progress[x])
 
 
 def still_alive(jobs):
+    # check to see if jobs are all done:
     for x in jobs:
         if x.is_alive():
             return True
@@ -143,4 +163,5 @@ def still_alive(jobs):
 
 
 if __name__ == '__main__':
+    # testing code:
     gen_grid(['debug this phrase, you silly turtle!', 'now debug this one at the same time, if you dare!'], 100, 100)

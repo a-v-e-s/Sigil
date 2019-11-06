@@ -6,7 +6,7 @@ def scramble(phrases, colorized=1, chop_width=10, chop_height=10):
     font_options = []
     for x in os.listdir('fonts'):
         font_options.append(os.path.join(os.getcwd(), 'fonts', x))
-
+    #
     random.shuffle(phrases)
     for phrase in phrases:
         # make an image out of the text in each entry
@@ -23,7 +23,7 @@ def scramble(phrases, colorized=1, chop_width=10, chop_height=10):
         canvas = Image.new('L', (text_width, text_height), "white")
         draw = ImageDraw.Draw(canvas)
         draw.text((0, 0), phrase, 'black', font)
-
+        #
         # if user wanted it colorized, colorize it randomly
         if colorized:
             text_color = (random.choice(range(255)),
@@ -40,7 +40,7 @@ def scramble(phrases, colorized=1, chop_width=10, chop_height=10):
             whitepoint = random.choice(range(212, 255))
             canvas = ImageOps.colorize(canvas, text_color,
                 background_color, mid, blackpoint, whitepoint, midpoint)
-
+        #
         # chop the image of the text up into bite-sized blocks
         img_width, img_height = canvas.size
         blocks = []
@@ -63,7 +63,7 @@ def scramble(phrases, colorized=1, chop_width=10, chop_height=10):
                 else:
                     box = (w, h, img_width, img_height)
                 blocks.append(canvas.crop(box))
-        
+        #
         # prepare the new image
         if (factors.factor_combinations(len(blocks))[-1][1] >
             (3 * factors.factor_combinations(len(blocks))[-1][0])):
@@ -93,7 +93,7 @@ def scramble(phrases, colorized=1, chop_width=10, chop_height=10):
         position = (x, y)
         img = Image.new('RGB', (img_width, img_height),
             'white')
-
+        #
         # shuffle and put the pieces into place
         random.shuffle(blocks)
         for b in blocks:
@@ -104,5 +104,5 @@ def scramble(phrases, colorized=1, chop_width=10, chop_height=10):
                 x = 0
                 y += chop_height
             position = (x, y)
-
+        #
         yield [img, phrase]
