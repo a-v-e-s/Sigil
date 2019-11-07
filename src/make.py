@@ -1,7 +1,7 @@
 """
-make.py
-
-takes input from gui.py and sends it to the appropriate module
+make.py:
+Takes input from gui.py and sends it to the appropriate module.
+Saves and optionally displays the results.
 """
 
 import os

@@ -1,4 +1,3 @@
 Make the inkblots colorized!!!
 
-clean up the codebase. Add documentation.
 make the repo more professional looking and make the src folder scripts accessible from the top level directory.

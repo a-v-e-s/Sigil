@@ -1,3 +1,10 @@
+"""
+chaos.py: 
+Takes a phrase supplied by the user, creates an image of the text.
+Chops that image up into pieces, then rearranges and optionally colors them at random.
+Yields the image along with the original phrase.
+"""
+
 import os, math, random, factors
 from PIL import Image, ImageFont, ImageDraw, ImageOps
 

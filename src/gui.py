@@ -1,6 +1,5 @@
 """
-gui.py
-
+gui.py:
 The top-level script for this repository.
 Provides a graphical frontend for encoding language into an image
 """
@@ -37,12 +36,6 @@ class Gui():
         self.reposition()
         self.entries[0].focus_set()
         #
-        # these should maybe be removed. They are the defaults in chaos.py:
-        #self.chop_width = tk.IntVar()
-        #self.chop_height = tk.IntVar()
-        #self.chop_width.set(10)
-        #self.chop_height.set(10)
-        #
         # fill out the options frame:
         self.mode = tk.IntVar()
         self.colorized = tk.IntVar()
@@ -55,15 +48,13 @@ class Gui():
         self.chaos.grid(row=2, column=1)
         self.rorshach.grid(row=2, column=2)
         self.kaleidoscope.grid(row=2, column=3)
-        tk.Label(self.options, text='Colorize:').grid(row=3, column=1, columnspan=2)
+        self.colorize_l = tk.Label(self.options, text='Colorize:')
         self.colorize = tk.Checkbutton(self.options, variable=self.colorized, offvalue=0, onvalue=1)
-        self.colorize.grid(row=3, column=3)
-        tk.Label(self.options, text='Blur:').grid(row=4, column=1, columnspan=2)
+        self.blur_l = tk.Label(self.options, text='Blur:')
         self.blur = tk.Scale(self.options, variable=self.blurring, orient='horizontal', from_=0, to=3)
-        self.blur.grid(row=4, column=3)
-        tk.Label(self.options, text='Automatically show resulting image?').grid(row=5, column=1, columnspan=2)
+        tk.Label(self.options, text='Automatically show resulting image?').grid(row=4, column=1, columnspan=2)
         self.show = tk.Checkbutton(self.options, variable=self.shown, offvalue=0, onvalue=1)
-        self.show.grid(row=5, column=3)
+        self.show.grid(row=4, column=3)
         self.mode.set(2)
         self.rorsh_mode()
         #
@@ -115,15 +106,23 @@ class Gui():
 
     def rorsh_mode(self):
         # adjust options widgets:
-        self.colorize.configure(state='disabled')
         self.colorize.deselect()
+        self.colorize.configure(state='disabled')
+        self.colorize_l.grid_remove()
+        self.colorize.grid_remove()
+        self.blur_l.grid(row=3, column=1, columnspan=2)
+        self.blur.grid(row=3, column=3)
         self.blur.configure(state='normal')
 
 
     def chaos_mode(self):
         # adjust options widgets:
-        self.blur.configure(state='disabled')
         self.blurring.set(0)
+        self.blur.configure(state='disabled')
+        self.blur_l.grid_remove()
+        self.blur.grid_remove()
+        self.colorize_l.grid(row=3, column=1, columnspan=2)
+        self.colorize.grid(row=3, column=3)
         self.colorize.configure(state='normal')
 
 

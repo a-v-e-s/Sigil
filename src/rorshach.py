@@ -1,6 +1,5 @@
 """
-rorshach.py
-
+rorshach.py:
 Creates and manages processes for each phrase supplied by the user, calling dual_forces.darken() on each one.
 Waits for these processes to complete before turning each grid saved in grids.pkl into a png image.
 Monitors progress so the user doesn't suspect the application is frozen or doing nothing.
@@ -45,20 +44,26 @@ def gen_grid(phrases, blur=0, width=480, height=360):
         jobs.append(p)
     #
     # set the Processes and progress monitor into motion:
-    threading.Thread(target=updater, args=(jobs, labels, progress)).start()
-    if len(jobs) >= processors:
-        while jobs:
-            do_these = jobs[:processors-1]
-            for x in do_these:
-                x.start()
-            for x in do_these:
-                x.join()
-            jobs = jobs[processors-1:]
-    else:
-        for x in jobs:
-            x.start()
-        for x in jobs:
-            x.join()
+    running_jobs = []
+    for x in range(processors-1):
+        try:
+            jobs[x].start()
+            running_jobs.append(jobs[x])
+            jobs.remove(jobs[x])
+        except IndexError:
+            break
+    threading.Thread(target=updater, args=(running_jobs, labels, progress)).start()
+    while jobs:
+        time.sleep(1)
+        for x in running_jobs:
+            if not x.is_alive():
+                running_jobs.remove(x)
+                jobs[0].start()
+                running_jobs.append(jobs[0])
+                jobs.remove(jobs[0])
+                break
+    for x in running_jobs:
+        x.join()
     #
     # retrieve the grids, turn them into images and yield them and their codename:
     with open('grids.pkl', 'rb') as f:
@@ -78,6 +83,7 @@ def inkblot(grid, inverse, blur, width, height):
                 pic1[x,y] = 0
             else:
                 pic1[x,y] = 255
+    # fixes a weird bug that I couldn't seem to resolve any other way
     img1, pic1 = extend(img1, pic1, 'l')
     #
     # do the same, but for the inverse grid:
@@ -131,7 +137,7 @@ def extend(img, pic, lr):
     return img, pic
 
 
-def updater(jobs, labels, progress):
+def updater(running_jobs, labels, progress):
     # update the number of impressions for each image until jobs are done
     while True:
         time.sleep(0.5)
@@ -142,7 +148,7 @@ def updater(jobs, labels, progress):
                         y[1].configure(text=progress[x])
         except Exception:
             pass
-        if still_alive(jobs):
+        if still_alive(running_jobs):
             continue
         else:
             break
@@ -154,9 +160,9 @@ def updater(jobs, labels, progress):
                 y[1].configure(text=progress[x])
 
 
-def still_alive(jobs):
+def still_alive(running_jobs):
     # check to see if jobs are all done:
-    for x in jobs:
+    for x in running_jobs:
         if x.is_alive():
             return True
     return False

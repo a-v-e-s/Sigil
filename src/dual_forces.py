@@ -9,13 +9,13 @@ Following is a description of the purpose of most of the variables in use:
 
 phrase: user supplied data to be randomly encoded into an image
 codename: obfuscated hash of the phrase
-fib: sequence of the first 1000 fibonacci numbers; used to determine whether or not to fill in a grid poin.
+fib: sequence of the first 1000 fibonacci numbers; used to determine whether or not to fill in a grid point.
 numbs: formed from phrase and used to determine whether or not to fill in a grid point
 grid : array of grid points used to determine whether to fill in pixels on an image
 inverse: array of grid points used to determine whether to fill in pixels on an image
-points: total grid points in one grid
-pixies: total grid points which will be darkened in one grid
-impressions: times phrase is used to encode itself into the image
+points: total grid points in one of the two grids
+pixies: total grid points which will be darkened in one of the two grids
+impressions: number oftimes time phrase is used to encode itself into the image
 xc: coordinates for main grid
 y: coordinates for main grid
 zx: coordinates for inverse grid
@@ -44,7 +44,6 @@ def darken(phrase, progress, width=240, height=360):
     fib = fibonacci.make_fibonacci(1000)[4:]
     numbs = [ord(x) for x in phrase]
     grid = [[8 for x in range(width)] for x in range(height)]
-    inverse = [[8 for x in range(width)] for x in range(height)]
     points = width * height
     pixies = points // 2
     impressions = 0
@@ -53,11 +52,8 @@ def darken(phrase, progress, width=240, height=360):
     x = random.randint(0, width-1)
     xc = x    # I don't understand why this is necessary but it is.
     y = random.randint(0, height-1)
-    zx = width-1 - x
-    zy = height-1 - y
     #
     grid[y][x] = 1
-    inverse[zy][zx] = 1
     blacks = [(y,x)]
     new_blacks = [True, -1]
     pixies -= 1
@@ -67,7 +63,6 @@ def darken(phrase, progress, width=240, height=360):
     whitened = False
     #
     # begin the loop!
-    #
     while pixies > 0:
         try:
             progress[codename] = impressions
@@ -79,8 +74,6 @@ def darken(phrase, progress, width=240, height=360):
             xc = x
             if grid[y][x] == 8:
                 grid[y][x] = 1
-                zy = height-1 - y
-                zx = width-1 - xc
                 pixies -= 1
                 count += 1
                 blacks.append((y,xc))
@@ -103,9 +96,6 @@ def darken(phrase, progress, width=240, height=360):
                     impressions += 1
                     if count % numbs[0] != 0:
                         grid[y][h] = 1
-                        zy = height-1 - y
-                        zx = width-1 - h
-                        inverse[zy][zx] = 1
                         count += 1
                         pixies -= 1
                         used = True
@@ -124,9 +114,6 @@ def darken(phrase, progress, width=240, height=360):
                     impressions += 1
                     if count % numbs[0] != 0:
                         grid[j][xc] = 1
-                        zy = height-1 - j
-                        zx = width-1 - xc
-                        inverse[zy][zx] = 1
                         count += 1
                         pixies -= 1
                         used = True
@@ -146,9 +133,6 @@ def darken(phrase, progress, width=240, height=360):
                     impressions += 1
                     if count % numbs[0] != 0:
                         grid[k][xc] = 1
-                        zy = height-1 - k
-                        zx = width-1 - xc
-                        inverse[zy][zx] = 1
                         count += 1
                         pixies -= 1
                         used = True
@@ -168,9 +152,6 @@ def darken(phrase, progress, width=240, height=360):
                     impressions += 1
                     if count % numbs[0] != 0:
                         grid[y][l] = 1
-                        zy = height-1 - y
-                        zx = width-1 - l
-                        inverse[zy][zx] = 1
                         count += 1
                         pixies -= 1
                         used = True
@@ -190,7 +171,7 @@ def darken(phrase, progress, width=240, height=360):
         else:
             fail_count += 1
             if fail_count > len(grid[0]) // 24:
-                grid, inverse, width, height, blacks, numbs, pixies, progress, impressions = whiten(grid, inverse, width, height, blacks, numbs, pixies, progress, codename, impressions)
+                grid, width, height, blacks, numbs, pixies, progress, codename, impressions = whiten(grid, width, height, blacks, numbs, pixies, progress, codename, impressions)
                 use_first = []
                 fail_count = 0
                 whitened = True
@@ -205,9 +186,6 @@ def darken(phrase, progress, width=240, height=360):
                         impressions += 1
                         if count % numbs[0] != 0:
                             grid[y][h] = 1
-                            zy = height-1 - y
-                            zx = width-1 - h
-                            inverse[zy][zx] = 1
                             count += 1
                             pixies -= 1
                             used = True
@@ -225,9 +203,6 @@ def darken(phrase, progress, width=240, height=360):
                         impressions += 1
                         if count % numbs[0] != 0:
                             grid[j][xc] = 1
-                            zy = height-1 - j
-                            zx = width-1 - xc
-                            inverse[zy][zx] = 1
                             count += 1
                             pixies -= 1
                             used = True
@@ -245,9 +220,6 @@ def darken(phrase, progress, width=240, height=360):
                         impressions += 1
                         if count % numbs[0] != 0:
                             grid[k][xc] = 1
-                            zy = height-1 - k
-                            zx = width-1 - xc
-                            inverse[zy][zx] = 1
                             count += 1
                             pixies -= 1
                             used = True
@@ -265,9 +237,6 @@ def darken(phrase, progress, width=240, height=360):
                         impressions += 1
                         if count % numbs[0] != 0:
                             grid[y][l] = 1
-                            zy = height-1 - y
-                            zx = width-1 - l
-                            inverse[zy][zx] = 1
                             count += 1
                             pixies -= 1
                             used = True
@@ -287,14 +256,25 @@ def darken(phrase, progress, width=240, height=360):
                 fail_count += 1
                 blacks.reverse()
                 if fail_count > len(grid[0]) // 24:
-                    grid, inverse, width, height, blacks, numbs, pixies, progress, impressions = whiten(grid, inverse, width, height, blacks, numbs, pixies, progress, codename, impressions)
+                    grid, width, height, blacks, numbs, pixies, progress, codename, impressions = whiten(grid, width, height, blacks, numbs, pixies, progress, codename, impressions)
                     use_first = []
                     fail_count = 0
                     whitened = True
     #
+    # create the inverse grid:
+    inverse = [[8 for x in range(width)] for x in range(height)]
+    rownum = -1
+    for row in grid:
+        rownum += 1
+        colnum = -1
+        for x in row:
+            colnum += 1
+            if x == 1:
+                inverse[(len(grid)-1 - rownum)][(len(row)-1 - colnum)] = 1
+    #
     # return if testing:
     if phrase == 'turtle clucker.':
-        return grid, impressions
+        return grid, inverse, impressions
     # final impression count:
     try:
         progress[codename] = impressions
@@ -321,15 +301,12 @@ def darken(phrase, progress, width=240, height=360):
             pickle.dump(grids, f)
 
 
-def whiten(grid, inverse, width, height, blacks, numbs, pixies, progress, codename, impressions):
+def whiten(grid, width, height, blacks, numbs, pixies, progress, codename, impressions):
     fib = fibonacci.make_fibonacci(1000)[4:]
     r = random.choice(blacks)
     y = r[0]
     xc = r[1]
-    zy = height-1 - y
-    zx = width-1 - xc
     grid[y][xc] = 8
-    inverse[zy][zx] = 8
     whites = [(y,xc)]
     new_whites = [True, -1]
     pixies += 1
@@ -354,10 +331,7 @@ def whiten(grid, inverse, width, height, blacks, numbs, pixies, progress, codena
                     impressions += 1
                     if numbs[0] % whitened == 0:
                         grid[y][h] = 8
-                        zy = height-1 - y
                         whitening = True
-                        zx = width-1 - h
-                        inverse[zy][zx] = 8
                         whitened += 1
                         pixies += 1
                         whites.append((y,h))
@@ -374,10 +348,7 @@ def whiten(grid, inverse, width, height, blacks, numbs, pixies, progress, codena
                     impressions += 1
                     if numbs[0] % whitened == 0:
                         grid[j][xc] = 8
-                        zy = height-1 - j
                         whitening = True
-                        zx = width-1 - xc
-                        inverse[zy][zx] = 8
                         whitened += 1
                         pixies += 1
                         whites.append((j,xc))
@@ -395,10 +366,7 @@ def whiten(grid, inverse, width, height, blacks, numbs, pixies, progress, codena
                     impressions += 1
                     if numbs[0] % whitened == 0:
                         grid[k][xc] = 8
-                        zy = height-1 - k
                         whitening = True
-                        zx = width-1 - xc
-                        inverse[zy][zx] = 8
                         whitened += 1
                         pixies += 1
                         whites.append((k,xc))
@@ -416,10 +384,7 @@ def whiten(grid, inverse, width, height, blacks, numbs, pixies, progress, codena
                     impressions += 1
                     if numbs[0] % whitened == 0:
                         grid[y][l] = 8
-                        zy = height-1 - y
                         whitening = True
-                        zx = width-1 - l
-                        inverse[zy][zx] = 8
                         whitened += 1
                         pixies += 1
                         whites.append((y,l))
@@ -432,12 +397,17 @@ def whiten(grid, inverse, width, height, blacks, numbs, pixies, progress, codena
                 if whitened == fib[0]:
                     fib.remove(whitened)
     #
-    return grid, inverse, width, height, blacks, numbs, pixies, progress, impressions
+    return grid, width, height, blacks, numbs, pixies, progress, codename, impressions
 
 
 if __name__ == '__main__':
     # testing code:
     phrase = 'turtle clucker.'
-    grid, impressions = darken(phrase, {hex(hash(phrase))[2:]: 0}, 25, 50)
+    grid, inverse, impressions = darken(phrase, {hex(hash(phrase))[2:]: 0}, 25, 50)
+    print('grid:')
     for x in grid:
         print(x)
+    print('inverse:')
+    for x in inverse:
+        print(x)
+    print('impressions:', impressions)
