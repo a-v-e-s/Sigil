@@ -12,14 +12,11 @@ codename: obfuscated hash of the phrase
 fib: sequence of the first 1000 fibonacci numbers; used to determine whether or not to fill in a grid point.
 numbs: formed from phrase and used to determine whether or not to fill in a grid point
 grid : array of grid points used to determine whether to fill in pixels on an image
-inverse: array of grid points used to determine whether to fill in pixels on an image
 points: total grid points in one of the two grids
 pixies: total grid points which will be darkened in one of the two grids
 impressions: number oftimes time phrase is used to encode itself into the image
 xc: coordinates for main grid
 y: coordinates for main grid
-zx: coordinates for inverse grid
-zy: coordinates for inverse grid
 blacks: list of all grid points to be shaded black
 new_blacks: [whether or not new grid points were darkened on previous while loop, and how many]
 count: total number of grid points darkened. never resets. removed from fib when count == fib[0]. not used in whiten method
