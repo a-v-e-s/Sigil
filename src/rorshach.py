@@ -24,21 +24,24 @@ def gen_grid(phrases, blur=0, width=480, height=360):
     # begin constructing progress monitor:
     monitor = tk.Toplevel()
     monitor.title('Progress Monitor')
-    tk.Label(monitor, text='Codename:').grid(row=1, column=1)
-    tk.Label(monitor, text='Phrase factored into image x times:').grid(row=1, column=2)
+    tk.Label(monitor, text='Unfortunately the progress monitor feature does not currently work on Windows.').pack()
+    tk.Label(monitor, text='This program can take a LONG time to run, especially if you have many images being generated.').pack()
+    tk.Label(monitor, text='Check your Task Manager if you are uncertain whether the program has frozen or not. (It probably hasn\'t.)').pack()
+    #tk.Label(monitor, text='Codename:').grid(row=1, column=1)
+    #tk.Label(monitor, text='Phrase factored into image x times:').grid(row=1, column=2)
     #
     # create a Process instance and set of labels for each phrase:
     jobs = []
-    labels = []
-    rownum = 1
+    #labels = []
+    #rownum = 1
     for phrase in phrases:
-        rownum += 1
+        #rownum += 1
         codename = hex(hash(phrase))[2:]
-        name = tk.Label(monitor, text=codename)
-        name.grid(row=rownum, column=1)
-        numb = tk.Label(monitor, text=0)
-        numb.grid(row=rownum, column=2)
-        labels.append([name, numb])
+        #name = tk.Label(monitor, text=codename)
+        #name.grid(row=rownum, column=1)
+        #numb = tk.Label(monitor, text=0)
+        #numb.grid(row=rownum, column=2)
+        #labels.append([name, numb])
         progress[codename] = 0
         p = multiprocessing.Process(target=dual_forces.darken, args=(phrase, progress, width//2, height))
         jobs.append(p)
@@ -52,7 +55,7 @@ def gen_grid(phrases, blur=0, width=480, height=360):
             jobs.remove(jobs[x])
         except IndexError:
             break
-    threading.Thread(target=updater, args=(running_jobs, labels, progress)).start()
+    #threading.Thread(target=updater, args=(running_jobs, labels, progress)).start()
     while jobs:
         time.sleep(1)
         for x in running_jobs:
