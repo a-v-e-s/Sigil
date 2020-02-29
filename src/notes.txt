@@ -1,3 +1,12 @@
 Make the inkblots colorized!!!
 
 make the repo more professional looking and make the src folder scripts accessible from the top level directory.
+
+=============================================================================
+
+how to make rorshach colorful:
+
+divvy the color wheel up at (pseudo)-random. assign half to 'white' and half to 'black'
+each starting point is (pseudo)-random.
+shift probability determined by how likely the letter is to occur
+switch probability determined by how unlikely the letter is to occur
