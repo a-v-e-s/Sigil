@@ -1,12 +1,100 @@
-Make the inkblots colorized!!!
+This just flips a grid to and from the same positions
 
-make the repo more professional looking and make the src folder scripts accessible from the top level directory.
+for x in range(len(grid[0])):
+	for y in grid:
+		row.append(y[x])
+	lisp2.append(row)
+	row = []
 
-=============================================================================
+=============================================================
 
-how to make rorshach colorful:
+grid1 -> grid2
 
-divvy the color wheel up at (pseudo)-random. assign half to 'white' and half to 'black'
-each starting point is (pseudo)-random.
-shift probability determined by how likely the letter is to occur
-switch probability determined by how unlikely the letter is to occur
+	grid1[0][0] -> grid2[0][-1]
+	grid1[0][1] -> grid2[1][-1]
+	grid1[0][2] -> grid2[2][-1]
+	grid1[0][3] -> grid2[3][-1]
+
+		grid2[0][-1] = grid1[0][0]
+		grid2[1][-1] = grid1[0][1]
+		grid2[2][-1] = grid1[0][2]
+		grid2[3][-1] = grid1[0][3]
+
+	grid1[1][0] -> grid2[0][-2]
+	grid1[1][1] -> grid2[1][-2]
+	grid1[1][2] -> grid2[2][-2]
+	grid1[1][3] -> grid2[3][-2]
+
+		grid2[0][-2] = grid1[1][0]
+		grid2[1][-2] = grid1[1][1]
+		grid2[2][-2] = grid1[1][2]
+		grid2[3][-2] = grid1[1][3]
+
+	grid1[2][0] -> grid2[0][-3]
+	grid1[2][1] -> grid2[1][-3]
+	grid1[2][2] -> grid2[2][-3]
+	grid1[2][3] -> grid2[3][-3]
+
+		grid2[0][-3] = grid[2][0]
+		grid2[1][-3] = grid[2][1]
+		grid2[2][-3] = grid[2][2]
+		grid2[3][-3] = grid[2][3]
+
+	grid1[3][0] -> grid2[0][-4]
+	grid1[3][1] -> grid2[1][-4]
+	grid1[3][2] -> grid2[2][-4]
+	grid1[3][3] -> grid2[3][-4]
+
+		grid2[0][-4] = grid1[3][0]
+		grid2[1][-4] = grid1[3][1]
+		grid2[2][-4] = grid1[3][2]
+		grid2[3][-4] = grid1[3][3]
+
+grid2 -> grid3
+
+	grid2[0][0] -> grid3[0][-1]
+	grid2[0][1] -> grid3[1][-1]
+	grid2[0][2] -> grid3[2][-1]
+	grid2[0][3] -> grid3[3][-1]
+
+        grid3[0][-1] = grid2[0][0]
+        grid3[1][-1] = grid2[0][1]
+        grid3[2][-1] = grid2[0][2]
+        grid3[3][-1] = grid2[0][3]
+
+	grid2[1][0] -> grid3[0][-2]
+	grid2[1][1] -> grid3[1][-2]
+	grid2[1][2] -> grid3[2][-2]
+	grid2[1][3] -> grid3[3][-2]
+
+        grid3[0][-2] = grid2[1][0]
+        grid3[1][-2] = grid2[1][1]
+        grid3[2][-2] = grid2[1][2]
+        grid3[3][-2] = grid2[1][3]
+
+	grid2[2][0] -> grid3[0][-3]
+	grid2[2][1] -> grid3[1][-3]
+	grid2[2][2] -> grid3[2][-3]
+	grid2[2][3] -> grid3[3][-3]
+
+	grid2[3][0] -> grid3[0][-4]
+	grid2[3][1] -> grid3[1][-4]
+	grid2[3][2] -> grid3[2][-4]
+	grid2[3][3] -> grid3[3][-4]
+
+==============================================================
+
+def reset():
+	print('usage: row, grid0, grid1, grid2, grid3, negs, positives, keys = reset()')
+	grid0 = [[x for x in range(5)] for x in range(5)]
+	row, grid1, grid2, grid3 = [], [], [], []
+	negs = [-x for x in range(1, len(grid0)+1)]
+	positives = [x for x in range(len(grid0))]
+	keys = {0: grid0, 1: grid1, 2: grid2, 3: grid3}
+	return row, grid0, grid1, grid2, grid3, negs, positives, keys
+
+for a in range(len(keys.keys())-1):
+    keys[a+1] = [[0 for x in range(len(keys[a]))] for x in range(len(keys[a]))]
+    for b in range(len(keys[0][0])):
+        for c in range(len(keys[0][0])):
+            keys[a+1][c][negs[b]] = keys[a][positives[b]][c]	

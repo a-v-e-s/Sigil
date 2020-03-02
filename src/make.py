@@ -14,7 +14,7 @@ def make(phrases, mode, colorized=1, blur=0, show=1, dir=os.getcwd()):
     # rorshach mode:
     elif mode == 2:
         import rorshach
-        imgs = rorshach.gen_grid(phrases, colorized=1, blur=0, width=480, height=360)
+        imgs = rorshach.gen_grid(phrases, colorized=1, blur=0, width=360, height=360)
     #
     # save and display the image if the user requested:
     for img, phrase in imgs:
