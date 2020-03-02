@@ -11,9 +11,9 @@ from PIL import Image, ImageFilter
 from multiprocessing.managers import SyncManager
 from sys import exc_info
 import dual_forces
+import rorshach_on_acid
 
-
-def gen_grid(phrases, blur=0, width=480, height=360):
+def gen_grid(phrases, colorized=1, blur=0, width=480, height=360):
     # shuffle phrases, prepare for multiprocessing:
     random.shuffle(phrases)
     processors = multiprocessing.cpu_count()
@@ -40,8 +40,12 @@ def gen_grid(phrases, blur=0, width=480, height=360):
         numb.grid(row=rownum, column=2)
         labels.append([name, numb])
         progress[codename] = 0
-        p = multiprocessing.Process(target=dual_forces.darken, args=(phrase, progress, width//2, height))
-        jobs.append(p)
+        if colorized == 0:
+            p = multiprocessing.Process(target=dual_forces.darken, args=(phrase, progress, width//2, height))
+            jobs.append(p)
+        else:
+            p = multiprocessing.Process(target=rorshach_on_acid.colour, args=(phrase, progress, width, height))
+            jobs.append(p)
     #
     # set the Processes and progress monitor into motion:
     running_jobs = []
@@ -52,7 +56,8 @@ def gen_grid(phrases, blur=0, width=480, height=360):
             jobs.remove(jobs[x])
         except IndexError:
             break
-    threading.Thread(target=updater, args=(running_jobs, labels, progress)).start()
+    if __name__ != '__main__':
+        threading.Thread(target=updater, args=(running_jobs, labels, progress)).start()
     while jobs:
         time.sleep(1)
         for x in running_jobs:
@@ -69,8 +74,31 @@ def gen_grid(phrases, blur=0, width=480, height=360):
     with open('grids.pkl', 'rb') as f:
         grids = pickle.load(f)
         for x in grids:
-            img = inkblot(x[0], x[1], blur, width, height)
-            yield img, x[2]
+            if not colorized:
+                img = inkblot(x[0], x[1], blur, width, height)
+                yield img, x[2]
+            elif colorized:
+                img = abstract_art(x[0], blur, width, height)
+                yield img, x[1]
+
+
+def abstract_art(grid, blur, width, height):
+    img = Image.new('RGB', (width, height), color=(0, 0, 0))
+    pic1 = img.load()
+    for y in range(img.size[1]):
+        for x in range(img.size[0]):
+            pic1[x,y] = tuple(grid[y][x])
+    #
+    if blur == 1:
+        img = img.filter(ImageFilter.SMOOTH)
+    elif blur == 2:
+        img = img.filter(ImageFilter.SMOOTH_MORE)
+    elif blur == 3:
+        img = img.filter(ImageFilter.SMOOTH_MORE)
+        img = img.filter(ImageFilter.SMOOTH_MORE)
+    
+    return img
+
 
 
 def inkblot(grid, inverse, blur, width, height):
@@ -170,4 +198,6 @@ def still_alive(running_jobs):
 
 if __name__ == '__main__':
     # testing code:
-    gen_grid(['debug this phrase, you silly turtle!', 'now debug this one at the same time, if you dare!'], 100, 100)
+    imgs = gen_grid(['debug this phrase, you silly turtle!', 'now debug this one at the same time, if you dare!'], 200, 200)
+    for x in imgs:
+        x[0].show()

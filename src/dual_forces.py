@@ -279,6 +279,7 @@ def darken(phrase, progress, width=240, height=360):
         pass
     #
     # save to grids pickle file if not testing:
+    # probably a slight chance of race conditions here :S
     save_this = (grid, inverse, phrase, impressions)
     try:
         with open('grids.pkl', 'rb') as f:
@@ -286,12 +287,7 @@ def darken(phrase, progress, width=240, height=360):
         grids.append(save_this)
         with open('grids.pkl', 'wb') as f:
             pickle.dump(grids, f)
-    except EOFError:
-        grids = []
-        grids.append(save_this)
-        with open('grids.pkl', 'wb') as f:
-            pickle.dump(grids, f)
-    except FileNotFoundError:
+    except (EOFError, FileNotFoundError):
         grids = []
         grids.append(save_this)
         with open('grids.pkl', 'wb') as f:
@@ -399,12 +395,19 @@ def whiten(grid, width, height, blacks, numbs, pixies, progress, codename, impre
 
 if __name__ == '__main__':
     # testing code:
+    from PIL import Image
     phrase = 'turtle clucker.'
-    grid, inverse, impressions = darken(phrase, {hex(hash(phrase))[2:]: 0}, 25, 50)
-    print('grid:')
-    for x in grid:
-        print(x)
-    print('inverse:')
-    for x in inverse:
-        print(x)
+    width, height = 200, 200
+    grid, inverse, impressions = darken(phrase, {hex(hash(phrase))[2:]: 0}, width, height)
+    #
     print('impressions:', impressions)
+    print('fibonacci numbers left / 1000:', len(fib))
+    image = Image.new('L', (width, height))
+    pic1 = image.load()
+    for y in range(image.size[1]):
+        for x in range(image.size[0]):
+            if grid[y][x] == 8:
+                pic1[x,y] = 255
+            else:
+                pic1[x,y] = 0
+    image.show()
