@@ -1,87 +1,18 @@
-This just flips a grid to and from the same positions
+==============================================================
+switch_prob: ~line52:
+	return ((switch_numerator / relatives[key]) * 0.08) =>
+	return ((switch_numerator / relatives[key]) * 0.16)
 
-for x in range(len(grid[0])):
-	for y in grid:
-		row.append(y[x])
-	lisp2.append(row)
-	row = []
+fail_out: ~line 246:
+	if fail_count > len(grid[0]) // 24: =>
+	if fail_count > len(grid[0]) // 36:
+~line 361:
+	if fail_count > len(grid[0]) // 24: =>
+	if fail_count > len(grid[0]) // 36:
 
-=============================================================
-
-grid1 -> grid2
-
-	grid1[0][0] -> grid2[0][-1]
-	grid1[0][1] -> grid2[1][-1]
-	grid1[0][2] -> grid2[2][-1]
-	grid1[0][3] -> grid2[3][-1]
-
-		grid2[0][-1] = grid1[0][0]
-		grid2[1][-1] = grid1[0][1]
-		grid2[2][-1] = grid1[0][2]
-		grid2[3][-1] = grid1[0][3]
-
-	grid1[1][0] -> grid2[0][-2]
-	grid1[1][1] -> grid2[1][-2]
-	grid1[1][2] -> grid2[2][-2]
-	grid1[1][3] -> grid2[3][-2]
-
-		grid2[0][-2] = grid1[1][0]
-		grid2[1][-2] = grid1[1][1]
-		grid2[2][-2] = grid1[1][2]
-		grid2[3][-2] = grid1[1][3]
-
-	grid1[2][0] -> grid2[0][-3]
-	grid1[2][1] -> grid2[1][-3]
-	grid1[2][2] -> grid2[2][-3]
-	grid1[2][3] -> grid2[3][-3]
-
-		grid2[0][-3] = grid[2][0]
-		grid2[1][-3] = grid[2][1]
-		grid2[2][-3] = grid[2][2]
-		grid2[3][-3] = grid[2][3]
-
-	grid1[3][0] -> grid2[0][-4]
-	grid1[3][1] -> grid2[1][-4]
-	grid1[3][2] -> grid2[2][-4]
-	grid1[3][3] -> grid2[3][-4]
-
-		grid2[0][-4] = grid1[3][0]
-		grid2[1][-4] = grid1[3][1]
-		grid2[2][-4] = grid1[3][2]
-		grid2[3][-4] = grid1[3][3]
-
-grid2 -> grid3
-
-	grid2[0][0] -> grid3[0][-1]
-	grid2[0][1] -> grid3[1][-1]
-	grid2[0][2] -> grid3[2][-1]
-	grid2[0][3] -> grid3[3][-1]
-
-        grid3[0][-1] = grid2[0][0]
-        grid3[1][-1] = grid2[0][1]
-        grid3[2][-1] = grid2[0][2]
-        grid3[3][-1] = grid2[0][3]
-
-	grid2[1][0] -> grid3[0][-2]
-	grid2[1][1] -> grid3[1][-2]
-	grid2[1][2] -> grid3[2][-2]
-	grid2[1][3] -> grid3[3][-2]
-
-        grid3[0][-2] = grid2[1][0]
-        grid3[1][-2] = grid2[1][1]
-        grid3[2][-2] = grid2[1][2]
-        grid3[3][-2] = grid2[1][3]
-
-	grid2[2][0] -> grid3[0][-3]
-	grid2[2][1] -> grid3[1][-3]
-	grid2[2][2] -> grid3[2][-3]
-	grid2[2][3] -> grid3[3][-3]
-
-	grid2[3][0] -> grid3[0][-4]
-	grid2[3][1] -> grid3[1][-4]
-	grid2[3][2] -> grid3[2][-4]
-	grid2[3][3] -> grid3[3][-4]
-
+shift: lines ~75 -> ~105:
+	0.01, 0.99 =>
+	0.002, 0.998
 ==============================================================
 
 def reset():

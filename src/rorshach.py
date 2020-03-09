@@ -52,6 +52,7 @@ def gen_grid(phrases, colorized=1, blur=0, width=360, height=360):
     #
     # set the Processes and progress monitor into motion:
     running_jobs = []
+    # this seems to start 1 too few jobs in some cases...why??
     for x in range(processors_to_use):
         try:
             jobs[x].start()

@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 """
 gui.py:
 The top-level script for this repository.

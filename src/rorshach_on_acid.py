@@ -2,17 +2,26 @@
 
 import random, pickle, fibonacci, colorsys
 
+# Define some important constants:
 fib = fibonacci.make_fibonacci(1000)[4:]
+#
 hue_shift = random.uniform(-0.25, 0.25)
 lightness = 0.5
-saturation = 1
-lower_A = 0.125
+saturation = 0.9
+#
+variation = 0.125
 base_A = 0.25
-upper_A = 0.375
-lower_B = 0.625
 base_B = 0.75
-upper_B = .875
-
+lower_A = base_A - variation
+upper_A = base_A + variation
+lower_B = base_B - variation
+upper_B = base_B + variation
+#
+fail_out = 36 # this should probably be done a little differently.
+switch_const = 0.16 # 0.08
+shft_dgr = 0.003 # 0.01
+n_shft_dgr = 1 - shft_dgr
+#
 relatives = {
     'z': 0.00077,
     'q': 0.00095,
@@ -49,7 +58,7 @@ switch_numerator = relatives['z']
 def switch_prob(key):
     try:
         # experiment with different values for the constant here:
-        return ((switch_numerator / relatives[key]) * 0.08)
+        return ((switch_numerator / relatives[key]) * switch_const)
     except KeyError:
         return 0
 
@@ -76,29 +85,29 @@ def shift(rising, upper, lower, key, val, impressions):
     impressions += 1
     if random.random() < shift_prob(key):
         if rising:
-            if (val + 0.01) <= upper:
-                if (val + 0.01) <= 1:
-                    return val + 0.01
+            if (val + shft_dgr) <= upper:
+                if (val + shft_dgr) <= 1:
+                    return val + shft_dgr
                 else:
-                    return val - 0.99
+                    return val - n_shft_dgr
             else:
                 rising = False
-                if (val - 0.01) >= 0:
-                    return val - 0.01
+                if (val - shft_dgr) >= 0:
+                    return val - shft_dgr
                 else:
-                    return val + 0.99
+                    return val + n_shft_dgr
         else:
-            if (val - 0.01) >= lower:
-                if (val - 0.01) >= 0:
-                    return val - 0.01
+            if (val - shft_dgr) >= lower:
+                if (val - shft_dgr) >= 0:
+                    return val - shft_dgr
                 else:
-                    return val + 0.99
+                    return val + n_shft_dgr
             else:
                 rising = True
-                if (val + 0.01) <= 1:
-                    return val + 0.01
+                if (val + shft_dgr) <= 1:
+                    return val + shft_dgr
                 else:
-                    return val - 0.99
+                    return val - n_shft_dgr
     else:
         return val
     
@@ -243,7 +252,7 @@ def colour(phrase, progress, width=100, height=100):
             continue
         else:
             fail_count += 1
-            if fail_count > len(grid[0]) // 24:
+            if fail_count > len(grid[0]) // fail_out:
                 (
                     grid,
                     width,
@@ -358,7 +367,7 @@ def colour(phrase, progress, width=100, height=100):
             if not used:
                 fail_count += 1
                 Bs.reverse()
-                if fail_count > len(grid[0]) // 24:
+                if fail_count > len(grid[0]) // fail_out:
                     (
                         grid,
                         width,
@@ -547,7 +556,6 @@ if __name__ == '__main__':
     grid, impressions = colour(phrase, {hex(hash(phrase))[2:]: 0}, width, height)
     #
     print('impressions:', impressions)
-    print('fibonacci numbers left / 1000:', len(fib))
     image = Image.new('RGB', (width, height), color=(0, 0, 0))
     pic1 = image.load()
     for y in range(image.size[1]):
