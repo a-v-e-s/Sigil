@@ -550,15 +550,17 @@ def invert(grid, width, height, phrase, Bs, numbs, pixies, progress, codename, i
 
 if __name__ == '__main__':
     # testing code:
-    from PIL import Image
+    #from PIL import Image
     phrase = 'turtle clucker.'
     width, height = 200, 200
     grid, impressions = colour(phrase, {hex(hash(phrase))[2:]: 0}, width, height)
     #
     print('impressions:', impressions)
+    """
     image = Image.new('RGB', (width, height), color=(0, 0, 0))
     pic1 = image.load()
     for y in range(image.size[1]):
         for x in range(image.size[0]):
             pic1[x,y] = tuple(grid[y][x])
     image.show()
+    """
